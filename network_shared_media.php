@@ -1,31 +1,31 @@
 <?php
 /**
  * @package Netword_Shared_Media
- * @version 0.1
+ * @version 0.5
  */
 /*
 Plugin Name: Network Shared Media
 Plugin URI: http://dekeijzer.org/
-Description: Based on http://blog.channeleaton.com/sharing-media-libraries-across-network-sites
-Author: Aaron Eaton, Joost de Keijzer
-Version: 0.1
+Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other blogs.
+Author: Joost de Keijzer, Aaron Eaton
+Version: 0.5
 */
 
 // Add filter that inserts our new tab
-function nsm_menu($tabs) {
+function network_shared_media_menu($tabs) {
 	$newtab = array('shared_media' => __('Network Shared Media', 'networksharedmedia'));
 	return array_merge($tabs, $newtab);
 }
-add_filter('media_upload_tabs', 'nsm_menu');
+add_filter('media_upload_tabs', 'network_shared_media_menu');
 
 // Load media_nsm_process() into the existing iframe
-function nsm_media_upload_shared_media() {
-	$nsm = new nsm();
+function network_shared_media_upload_shared_media() {
+	$nsm = new network_shared_media();
 	return wp_iframe(array( $nsm, 'media_upload_shared_media' ), array());
 }
-add_action('media_upload_shared_media', 'nsm_media_upload_shared_media');
+add_action('media_upload_shared_media', 'network_shared_media_upload_shared_media');
 
-class nsm {
+class network_shared_media {
 	var $blogs = array();
 	var $media_items = '';
 
