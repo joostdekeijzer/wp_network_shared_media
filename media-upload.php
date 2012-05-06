@@ -1,5 +1,8 @@
 <?php
+define('WP_ADMIN', FALSE);
+define('WP_LOAD_IMPORTERS', FALSE);
 require_once( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/wp-admin/admin.php' );
+
 // $blog_id is global var in WP
 
 if( isset( $_POST['send'] ) ) {
