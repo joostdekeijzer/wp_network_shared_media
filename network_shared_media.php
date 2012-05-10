@@ -26,7 +26,7 @@ function network_shared_media_upload_shared_media() {
 function network_shared_media_init() {
 	if ( current_user_can('upload_files') ) {
 		add_filter('media_upload_tabs', 'network_shared_media_menu');
-add_action('media_upload_shared_media', 'network_shared_media_upload_shared_media');
+		add_action('media_upload_shared_media', 'network_shared_media_upload_shared_media');
 	}
 }
 add_action( 'init', 'network_shared_media_init' );
@@ -34,9 +34,11 @@ add_action( 'init', 'network_shared_media_init' );
 class network_shared_media {
 	var $blogs = array();
 	var $media_items = '';
+	var $current_blog_id;
 
 	function __construct() {
 		global $blog_id;
+		$this->current_blog_id = $blog_id;
 
 		/* copied from depricated get_blog_list */
 		global $wpdb;
@@ -45,29 +47,41 @@ class network_shared_media {
 		$this->blogs = array();
 
 		foreach ( (array) $blogs as $details ) {
-			if( $details['blog_id'] != $blog_id ) {
+			if( $details['blog_id'] != $this->current_blog_id ) {
 				$this->blogs[] = $details;
 			}
 		}
 	}
 
-	function wp_edit_attachments_query( $q = false ) {
+	function wp_edit_attachments_query( $q = false, $errors ) {
+		global $wp_query;
 		$post_mime_types = $avail_post_mime_types = array();
+		$attachment_count = 0;
+		$list_string_output = '';
 		foreach( $this->blogs as $blog ) {
 			switch_to_blog( $blog['blog_id'] );
-			list( $more_post, $more_avail ) = wp_edit_attachments_query( $q );
-			$post_mime_types = array_merge_recursive( $more_post, $post_mime_types );
-			$avail_post_mime_types = array_merge_recursive( $more_avail, $avail_post_mime_types );
-		}
-		restore_current_blog();
+			if ( !current_user_can('upload_files') ) continue;
 
-		return array( $post_mime_types, $avail_post_mime_types );
+			list( $more_post, $more_avail ) = wp_edit_attachments_query( $q );
+
+			if( count( $post_mime_types ) == 0 ) $post_mime_types = $more_post;
+
+			$avail_post_mime_types = array_merge( $more_avail, $avail_post_mime_types );
+			$attachment_count += $wp_query->found_posts;
+			$list_string_output .= $this->get_media_items_current_blog(null, $errors);
+		}
+		switch_to_blog( $this->current_blog_id );
+
+		$avail_post_mime_types = array_values( array_unique( $avail_post_mime_types ) );
+		return array( $post_mime_types, $avail_post_mime_types, $attachment_count, $list_string_output );
 	}
 
 	function wp_count_attachments( $mime_type = '' ) {
 		$stats = array();
 		foreach( $this->blogs as $blog ) {
 			switch_to_blog( $blog['blog_id'] );
+			if ( !current_user_can('upload_files') ) continue;
+
 			$more_stats = (array) wp_count_attachments( $mime_type );
 			foreach( $more_stats as $k => $v ) {
 				if( array_key_exists( $k, $stats ) ) {
@@ -77,7 +91,7 @@ class network_shared_media {
 				}
 			}
 		}
-		restore_current_blog();
+		switch_to_blog( $this->current_blog_id );
 
 		return (object) $stats;
 	}
@@ -86,22 +100,29 @@ class network_shared_media {
 		$output = '';
 		foreach( $this->blogs as $blog ) {
 			switch_to_blog( $blog['blog_id'] );
-			$more_output = get_media_items( $post_id, $errors);
+			if ( !current_user_can('upload_files') ) continue;
 
-			// remove edit button
-			$more_output = preg_replace( "%<p><input type='button' id='imgedit-open-btn.+?class='imgedit-wait-spin'[^>]+></p>%s", '', $more_output );
-
-			// remove delete link
-			$more_output = preg_replace( "%<a href='#' class='del-link' onclick=.+?</a>%s", '', $more_output );
-			$more_output = preg_replace( "%<div id='del_attachment_.+?</div>%s", '', $more_output );
-
-			// insert site_id into attachments post array
-			$more_output = preg_replace( "%(attachments)(\[\d+\]\[)%", "$1[{$blog['blog_id']}]$2", $more_output);
-			$more_output = preg_replace( '%(<input type="submit" name="send)(\[\d+\]" id="send)(\[\d+\]" class="button" value="[^>]+>)%', "$1[{$blog['blog_id']}]$2[{$blog['blog_id']}]$3", $more_output );
-
-			$output .= $more_output;
+			$output .= $this->get_media_items_current_blog( $post_id, $errors );
 		}
-		restore_current_blog();
+		switch_to_blog( $this->current_blog_id );
+		return $output;
+	}
+
+	function get_media_items_current_blog( $post_id, $errors ) {
+		global $blog_id;
+		$output = get_media_items( $post_id, $errors);
+
+		// remove edit button
+		$output = preg_replace( "%<p><input type='button' id='imgedit-open-btn.+?class='imgedit-wait-spin'[^>]+></p>%s", '', $output );
+
+		// remove delete link
+		$output = preg_replace( "%<a href='#' class='del-link' onclick=.+?</a>%s", '', $output );
+		$output = preg_replace( "%<div id='del_attachment_.+?</div>%s", '', $output );
+
+		// insert site_id into attachments post array
+		$output = preg_replace( "%(attachments)(\[\d+\]\[)%", "$1[{$blog_id}]$2", $output);
+		$output = preg_replace( '%(<input type="submit" name="send)(\[\d+\]" id="send)(\[\d+\]" class="button" value="[^>]+>)%', "$1[{$blog_id}]$2[{$blog_id}]$3", $output );
+
 		return $output;
 	}
 
@@ -113,11 +134,12 @@ class network_shared_media {
 	 * @param unknown_type $errors
 	 */
 	function media_upload_shared_media($errors) {
-		global $wpdb, $wp_query, $wp_locale;
+		global $wpdb, $wp_locale;
 		global $type, $tab, $post_mime_types;
 	
 		media_upload_header();
-	
+		add_filter('attachment_fields_to_edit', 'media_post_single_attachment_fields_to_edit', 10, 2);
+
 		$post_id = intval($_REQUEST['post_id']);
 
 		// fix to make get_media_item add "Insert" button
@@ -138,7 +160,7 @@ class network_shared_media {
 			$start = 0;
 		add_filter( 'post_limits', create_function( '$a', "return 'LIMIT $start, 10';" ) );
 	
-		list($post_mime_types, $avail_post_mime_types) = $this->wp_edit_attachments_query();
+		list( $post_mime_types, $avail_post_mime_types, $attachment_count, $list_string_output ) = $this->wp_edit_attachments_query( false, $errors );
 	
 	?>
 	
@@ -168,7 +190,7 @@ class network_shared_media {
 	// If available type specified by media button clicked, filter by that type
 	if ( empty($_GET['post_mime_type']) && !empty($num_posts[$type]) ) {
 		$_GET['post_mime_type'] = $type;
-		list($post_mime_types, $avail_post_mime_types) = $this->wp_edit_attachments_query();
+		list( $post_mime_types, $avail_post_mime_types, $attachment_count, $list_string_output ) = $this->wp_edit_attachments_query( false, $errors );
 	}
 	if ( empty($_GET['post_mime_type']) || $_GET['post_mime_type'] == 'all' )
 		$class = ' class="current"';
@@ -199,7 +221,7 @@ class network_shared_media {
 		'format' => '',
 		'prev_text' => __('&laquo;'),
 		'next_text' => __('&raquo;'),
-		'total' => ceil($wp_query->found_posts / 10),
+		'total' => ceil($attachment_count / 10),
 		'current' => $_GET['paged']
 	));
 	
@@ -264,8 +286,8 @@ class network_shared_media {
 	</script>
 	
 	<div id="media-items">
-	<?php add_filter('attachment_fields_to_edit', 'media_post_single_attachment_fields_to_edit', 10, 2); ?>
-	<?php echo $this->get_media_items(null, $errors); ?>
+	<?php /* add_filter('attachment_fields_to_edit', 'media_post_single_attachment_fields_to_edit', 10, 2); */ ?>
+	<?php echo $list_string_output; ?>
 	</div>
 	</form>
 	<?php
