@@ -47,10 +47,13 @@ class network_shared_media {
 		$this->blogs = array();
 
 		foreach ( (array) $blogs as $details ) {
-			if( $details['blog_id'] != $this->current_blog_id ) {
-				$this->blogs[] = $details;
-			}
+			switch_to_blog( $details['blog_id'] );
+			if ( !current_user_can('upload_files') || $details['blog_id'] == $this->current_blog_id ) continue;
+
+			$details['name'] = get_bloginfo('name');
+			$this->blogs[] = $details;
 		}
+		switch_to_blog( $this->current_blog_id );
 	}
 
 	function wp_edit_attachments_query( $q = false, $errors ) {
@@ -150,7 +153,7 @@ class network_shared_media {
 		switch_to_blog( $nsm_blog_id );
 ?>
 
-	<div style="float:none;height: 2em;">
+	<div style="float:none;height: 3em;margin: 0 1em;">
 	<ul class="subsubsub">
 	<?php
 	$blog_links = array();
@@ -164,7 +167,7 @@ class network_shared_media {
 		if ( $blog['blog_id'] == $blog_id )
 			$class = ' class="current"';
 	
-		$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['domain'] . '</a>';
+		$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['name'] . '</a>';
 	}
 	echo "<li>" . __("Select blog:") . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
 	unset($blog_links);
