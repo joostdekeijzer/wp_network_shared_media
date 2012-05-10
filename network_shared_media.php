@@ -96,21 +96,21 @@ class network_shared_media {
 		return (object) $stats;
 	}
 
-	function get_media_items( $post_id, $errors ) {
+	function get_media_items_all_blogs( $post_id, $errors ) {
 		$output = '';
 		foreach( $this->blogs as $blog ) {
 			switch_to_blog( $blog['blog_id'] );
 			if ( !current_user_can('upload_files') ) continue;
 
-			$output .= $this->get_media_items_current_blog( $post_id, $errors );
+			$output .= $this->get_media_items( $post_id, $errors );
 		}
 		switch_to_blog( $this->current_blog_id );
 		return $output;
 	}
 
-	function get_media_items_current_blog( $post_id, $errors ) {
+	function get_media_items( $post_id, $errors ) {
 		global $blog_id;
-		$output = get_media_items( $post_id, $errors);
+		$output = get_media_items( $post_id, $errors );
 
 		// remove edit button
 		$output = preg_replace( "%<p><input type='button' id='imgedit-open-btn.+?class='imgedit-wait-spin'[^>]+></p>%s", '', $output );
@@ -118,10 +118,6 @@ class network_shared_media {
 		// remove delete link
 		$output = preg_replace( "%<a href='#' class='del-link' onclick=.+?</a>%s", '', $output );
 		$output = preg_replace( "%<div id='del_attachment_.+?</div>%s", '', $output );
-
-		// insert site_id into attachments post array
-		$output = preg_replace( "%(attachments)(\[\d+\]\[)%", "$1[{$blog_id}]$2", $output);
-		$output = preg_replace( '%(<input type="submit" name="send)(\[\d+\]" id="send)(\[\d+\]" class="button" value="[^>]+>)%', "$1[{$blog_id}]$2[{$blog_id}]$3", $output );
 
 		return $output;
 	}
@@ -134,23 +130,58 @@ class network_shared_media {
 	 * @param unknown_type $errors
 	 */
 	function media_upload_shared_media($errors) {
-		global $wpdb, $wp_locale;
-		global $type, $tab, $post_mime_types;
+		global $wpdb, $wp_query, $wp_locale, $type, $tab, $post_mime_types, $blog_id;
 	
 		media_upload_header();
-		add_filter('attachment_fields_to_edit', 'media_post_single_attachment_fields_to_edit', 10, 2);
 
+		$nsm_blog_id = null;
+		if( !array_key_exists( 'blog_id', $_GET ) ) $_GET['blog_id'] = null;
+
+		foreach( $this->blogs as $blog ) {
+			if( $_GET['blog_id'] == $blog['blog_id'] ) {
+				$nsm_blog_id = $blog['blog_id'];
+				break;
+			}
+		}
+
+		if( null == $nsm_blog_id )
+			$nsm_blog_id = $this->blogs[0]['blog_id'];
+
+		switch_to_blog( $nsm_blog_id );
+?>
+
+	<div style="float:none;height: 2em;">
+	<ul class="subsubsub">
+	<?php
+	$blog_links = array();
+	if ( empty($_GET['blog_id']) )
+		$class = ' class="current"';
+	else
+		$class = '';
+	foreach ( $this->blogs as $blog ) {
+		$class = '';
+		
+		if ( $blog['blog_id'] == $blog_id )
+			$class = ' class="current"';
+	
+		$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['domain'] . '</a>';
+	}
+	echo "<li>" . __("Select blog:") . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
+	unset($blog_links);
+	?>
+	</ul>
+	</div>
+
+<?php
 		$post_id = intval($_REQUEST['post_id']);
 
 		// fix to make get_media_item add "Insert" button
 		unset($_GET['post_id']);
-	
-		$form_action_url = plugins_url( 'media-upload.php', __FILE__ ) . "?type=$type&tab=library&post_id=$post_id";
+
+		$form_action_url = plugins_url( 'media-upload.php', __FILE__ ) . "?type=$type&tab=library&post_id=$post_id&blog_id=$blog_id";
 		$form_action_url = apply_filters('media_upload_form_url', $form_action_url, $type);
+
 		$form_class = 'media-upload-form validate';
-	
-		if ( get_user_setting('uploader') )
-			$form_class .= ' html-uploader';
 	
 		$_GET['paged'] = isset( $_GET['paged'] ) ? intval($_GET['paged']) : 0;
 		if ( $_GET['paged'] < 1 )
@@ -160,14 +191,14 @@ class network_shared_media {
 			$start = 0;
 		add_filter( 'post_limits', create_function( '$a', "return 'LIMIT $start, 10';" ) );
 	
-		list( $post_mime_types, $avail_post_mime_types, $attachment_count, $list_string_output ) = $this->wp_edit_attachments_query( false, $errors );
-	
-	?>
+		list($post_mime_types, $avail_post_mime_types) = wp_edit_attachments_query();
+?>
 	
 	<form id="filter" action="" method="get">
 	<input type="hidden" name="type" value="<?php echo esc_attr( $type ); ?>" />
 	<input type="hidden" name="tab" value="<?php echo esc_attr( $tab ); ?>" />
 	<input type="hidden" name="post_id" value="<?php echo (int) $post_id; ?>" />
+	<input type="hidden" name="blog_id" value="<?php echo (int) $blog_id; ?>" />
 	<input type="hidden" name="post_mime_type" value="<?php echo isset( $_GET['post_mime_type'] ) ? esc_attr( $_GET['post_mime_type'] ) : ''; ?>" />
 	
 	<p id="media-search" class="search-box">
@@ -179,7 +210,7 @@ class network_shared_media {
 	<ul class="subsubsub">
 	<?php
 	$type_links = array();
-	$_num_posts = (array) $this->wp_count_attachments();
+	$_num_posts = (array) wp_count_attachments();
 	$matches = wp_match_mime_types(array_keys($post_mime_types), array_keys($_num_posts));
 	foreach ( $matches as $_type => $reals )
 		foreach ( $reals as $real )
@@ -190,7 +221,7 @@ class network_shared_media {
 	// If available type specified by media button clicked, filter by that type
 	if ( empty($_GET['post_mime_type']) && !empty($num_posts[$type]) ) {
 		$_GET['post_mime_type'] = $type;
-		list( $post_mime_types, $avail_post_mime_types, $attachment_count, $list_string_output ) = $this->wp_edit_attachments_query( false, $errors );
+		list($post_mime_types, $avail_post_mime_types) = wp_edit_attachments_query();
 	}
 	if ( empty($_GET['post_mime_type']) || $_GET['post_mime_type'] == 'all' )
 		$class = ' class="current"';
@@ -221,7 +252,7 @@ class network_shared_media {
 		'format' => '',
 		'prev_text' => __('&laquo;'),
 		'next_text' => __('&raquo;'),
-		'total' => ceil($attachment_count / 10),
+		'total' => ceil($wp_query->found_posts / 10),
 		'current' => $_GET['paged']
 	));
 	
@@ -286,9 +317,10 @@ class network_shared_media {
 	</script>
 	
 	<div id="media-items">
-	<?php /* add_filter('attachment_fields_to_edit', 'media_post_single_attachment_fields_to_edit', 10, 2); */ ?>
-	<?php echo $list_string_output; ?>
+	<?php add_filter('attachment_fields_to_edit', 'media_post_single_attachment_fields_to_edit', 10, 2); ?>
+	<?php echo $this->get_media_items(null, $errors); ?>
 	</div>
+	<p class="ml-submit"></p>
 	</form>
 	<?php
 	}
