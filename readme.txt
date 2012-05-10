@@ -28,6 +28,7 @@ Based on http://blog.channeleaton.com/sharing-media-libraries-across-network-sit
 = 0.6 =
 * fixed bug where restore_current_blog would give unexpected results (when number of sites > 2)
 * checking for correct perimissions: upload_files permission required for both the "active" site as the networked sites
+* to reduce server load: choose blog to display media of (in stead of just showing them all)
 
 = 0.5 =
 * first public version
