@@ -4,7 +4,7 @@ Contributors: Joost de Keijzer, Aaron Eaton
 Tags: multisite, media
 Requires at least: 3.3
 Tested up to:  3.3
-Stable tag: 0.5
+Stable tag: 0.6
 
 Allows you to use media from other blogs in a Multisite environment.
 
@@ -24,6 +24,10 @@ Based on http://blog.channeleaton.com/sharing-media-libraries-across-network-sit
 * insert media -> see the new tab!
 
 == Changelog ==
+
+= 0.6 =
+* fixed bug where restore_current_blog would give unexpected results (when number of sites > 2)
+* checking for correct perimissions: upload_files permission required for both the "active" site as the networked sites
 
 = 0.5 =
 * first public version

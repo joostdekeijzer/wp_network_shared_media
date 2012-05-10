@@ -8,7 +8,7 @@ Plugin Name: Network Shared Media
 Plugin URI: http://dekeijzer.org/
 Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other blogs.
 Author: Joost de Keijzer, Aaron Eaton
-Version: 0.5
+Version: 0.6
 */
 
 // Add filter that inserts our new tab
@@ -16,14 +16,20 @@ function network_shared_media_menu($tabs) {
 	$newtab = array('shared_media' => __('Network Shared Media', 'networksharedmedia'));
 	return array_merge($tabs, $newtab);
 }
-add_filter('media_upload_tabs', 'network_shared_media_menu');
 
 // Load media_nsm_process() into the existing iframe
 function network_shared_media_upload_shared_media() {
 	$nsm = new network_shared_media();
 	return wp_iframe(array( $nsm, 'media_upload_shared_media' ), array());
 }
+
+function network_shared_media_init() {
+	if ( current_user_can('upload_files') ) {
+		add_filter('media_upload_tabs', 'network_shared_media_menu');
 add_action('media_upload_shared_media', 'network_shared_media_upload_shared_media');
+	}
+}
+add_action( 'init', 'network_shared_media_init' );
 
 class network_shared_media {
 	var $blogs = array();

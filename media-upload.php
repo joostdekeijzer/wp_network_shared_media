@@ -1,7 +1,11 @@
 <?php
 define('WP_ADMIN', FALSE);
 define('WP_LOAD_IMPORTERS', FALSE);
+
 require_once( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/wp-admin/admin.php' );
+
+if (!current_user_can('upload_files'))
+	wp_die(__('You do not have permission to upload files.'));
 
 // $blog_id is global var in WP
 
@@ -13,6 +17,12 @@ if( isset( $_POST['send'] ) ) {
 /* copied from media.php media_upload_form_handler */
 if ( isset( $nsm_blog_id ) && isset( $nsm_send_id ) ) {
 	switch_to_blog( $nsm_blog_id );
+	if (!current_user_can('upload_files')) {
+		$current_blog_name = get_bloginfo('name');
+		restore_current_blog();
+		wp_die(__('You do not have permission to upload files in blog: ')  . $current_blog_name );
+	}
+
 	add_filter('media_send_to_editor', 'image_media_send_to_editor', 10, 3);
 
 	$attachment = stripslashes_deep( $_POST['attachments'][$nsm_blog_id][$nsm_send_id] );
