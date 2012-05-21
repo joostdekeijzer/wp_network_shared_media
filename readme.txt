@@ -47,6 +47,7 @@ If a user doesn't have the 'upload_files' permission on the current (active) blo
 = 0.7 =
 * i18n (fee free to contact me for translations of the string "Netword Shared Media")
 * Updated readme
+* Added screenshot
 
 = 0.6 =
 * fixed bug where restore_current_blog would give unexpected results (when number of sites > 2)
