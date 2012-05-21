@@ -25,6 +25,7 @@ function network_shared_media_upload_shared_media() {
 
 function network_shared_media_init() {
 	if ( current_user_can('upload_files') ) {
+		load_plugin_textdomain( 'networksharedmedia', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 		add_filter('media_upload_tabs', 'network_shared_media_menu');
 		add_action('media_upload_shared_media', 'network_shared_media_upload_shared_media');
 	}
@@ -39,11 +40,6 @@ class network_shared_media {
 	function __construct() {
 		global $blog_id;
 		$this->current_blog_id = $blog_id;
-
-		$locale = get_locale();
-		$locale_file = dirname( __FILE__ ) . "/languages/$locale.php";
-		if ( is_readable( $locale_file ) )
-			require_once( $locale_file );
 
 		/* copied from depricated get_blog_list */
 		global $wpdb;

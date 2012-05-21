@@ -12,6 +12,10 @@ msgstr ""
 "X-Poedit-Language: Dutch\n"
 "X-Poedit-Country: NETHERLANDS\n"
 "X-Poedit-SourceCharset: utf-8\n"
+"Last-Translator: joost de keijzer <joost@dekeijzer.org>\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 
+# networksharedmedia
 msgid "Network Shared Media"
 msgstr "Netwerk Gedeelde Media"
+
