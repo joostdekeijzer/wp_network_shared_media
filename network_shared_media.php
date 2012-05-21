@@ -40,6 +40,11 @@ class network_shared_media {
 		global $blog_id;
 		$this->current_blog_id = $blog_id;
 
+		$locale = get_locale();
+		$locale_file = dirname( __FILE__ ) . "/languages/$locale.php";
+		if ( is_readable( $locale_file ) )
+			require_once( $locale_file );
+
 		/* copied from depricated get_blog_list */
 		global $wpdb;
 		$blogs = $wpdb->get_results( $wpdb->prepare("SELECT blog_id, domain, path FROM $wpdb->blogs WHERE site_id = %d AND public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0' ORDER BY registered DESC", $wpdb->siteid), ARRAY_A );

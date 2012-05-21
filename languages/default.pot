@@ -1,0 +1,14 @@
+# Copyright (C) 2012 
+# This file is distributed under the same license as the  package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Network Shared Media\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Language-Team:  <joost@dekeijzer.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Network Shared Media"
+msgstr ""
