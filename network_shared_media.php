@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Netword_Shared_Media
- * @version 0.6
+ * @version 0.7
  */
 /*
 Plugin Name: Network Shared Media
 Plugin URI: http://dekeijzer.org/
 Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other blogs.
 Author: Joost de Keijzer, Aaron Eaton
-Version: 0.6
+Version: 0.7
 */
 
 // Add filter that inserts our new tab
