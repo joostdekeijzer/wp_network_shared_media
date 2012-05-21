@@ -14,9 +14,9 @@ Allows you to use media from other blogs in a Multisite environment.
 
 This plugin adds a new tab to the "Add Media" window, allowing you to access media in other blogs.
 
-It can be very helpfull when you use http://wordpress.org/extend/plugins/multisite-language-switcher/ for setting up a multi-langual site as it prevents the editors from having to upload images twice.
+It can be very helpfull when you use [Multisite Language Switcher](http://wordpress.org/extend/plugins/multisite-language-switcher/) plugin for setting up a multi-langual site as it prevents the editors from having to upload images twice.
 
-Based on a blogpost by Aaron Eaton: http://blog.channeleaton.com/sharing-media-libraries-across-network-sites
+Based on a blogpost by [Aaron Eaton](http://blog.channeleaton.com/sharing-media-libraries-across-network-sites).
 
 == Installation ==
 
@@ -27,7 +27,26 @@ Based on a blogpost by Aaron Eaton: http://blog.channeleaton.com/sharing-media-l
 * edit a post or create a new one
 * insert media -> see the new tab!
 
+== Frequently Asked Questions ==
+
+= About Permissions =
+
+This plugin depends on the global WordPress blog permissions for viewing and editing Media.
+
+Only blogs where the user has 'upload_files' permission are shown in the Network Shared Media tab.
+
+If a user doesn't have the 'upload_files' permission on the current (active) blog, the tab isn't shown at all since that user can't access the Add Media pop-up window.
+
+== Screenshots ==
+1. New tab added to the Add Media popup window
+
+== Upgrade Notice ==
+
 == Changelog ==
+
+= 0.7 =
+* i18n (fee free to contact me for translations of the string "Netword Shared Media")
+* Updated readme
 
 = 0.6 =
 * fixed bug where restore_current_blog would give unexpected results (when number of sites > 2)
