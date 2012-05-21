@@ -18,14 +18,16 @@ It can be very helpfull when you use [Multisite Language Switcher](http://wordpr
 
 Based on a blogpost by [Aaron Eaton](http://blog.channeleaton.com/sharing-media-libraries-across-network-sites).
 
+Also see https://github.com/joostdekeijzer/wp_network_shared_media
+
 == Installation ==
 
-* download the plugin
-* uncompress it with your preferred unzip programme
-* copy the entire directory in your plugin directory of your wordpress blog (/wp-content/plugins)
-* network-activate the plugin
-* edit a post or create a new one
-* insert media -> see the new tab!
+* Download the plugin
+* Uncompress it with your preferred unzip programme
+* Copy the entire directory in your plugin directory of your wordpress blog (/wp-content/plugins)
+* Network-activate the plugin
+* Edit a post or create a new one
+* Open the Add Media popup -> see the new tab!
 
 == Frequently Asked Questions ==
 
