@@ -1,7 +1,7 @@
 === Netword Shared Media ===
 Contributors: joostdekeijzer
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=joost@dekeijzer.org&item_name=network-shared-media+Wordpress+plugin&item_number=Joost+de+Keijzer&currency_code=EUR
-Tags: multisite, media
+Tags: multisite, network, wpmu, media, image, photo, picture, mp3, video, integration
 Requires at least: 3.3
 Tested up to:  3.3
 Stable tag: 0.7
