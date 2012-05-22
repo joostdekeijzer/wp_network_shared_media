@@ -5,10 +5,12 @@
  */
 /*
 Plugin Name: Network Shared Media
-Plugin URI: http://dekeijzer.org/
-Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other blogs.
-Author: Joost de Keijzer, Aaron Eaton
+Plugin URI: http://wordpress.org/extend/plugins/network-shared-media/
+Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other blogs. Based on an idea of Aaron Eaton
+Author: Joost de Keijzer
+Author URI: http://dekeijzer.org/
 Version: 0.7
+Licence: GPLv2 or later
 */
 
 // Add filter that inserts our new tab
