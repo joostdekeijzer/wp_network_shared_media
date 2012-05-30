@@ -39,8 +39,21 @@ Only blogs where the user has 'upload_files' permission are shown in the Network
 
 If a user doesn't have the 'upload_files' permission on the current (active) blog, the tab isn't shown at all since that user can't access the Add Media pop-up window.
 
+= I still can't see the site listed! =
+
+A site can have several attributes which can be set through /wp-admin/network/sites.php .
+
+This plugin only shows sites which attributes are set as follows:
+* Public: true
+* Archived: false
+* Spam: false
+* Delete: false
+* Mature: ignored
+
 == Screenshots ==
 1. New tab added to the Add Media popup window
+2. The Network Shared Media tab lists the media per site
+3. Show a selected image and "Insert into Post"
 
 == Upgrade Notice ==
 
