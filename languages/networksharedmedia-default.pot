@@ -1,5 +1,5 @@
 # Copyright (C) 2012 
-# This file is distributed under the same license as the  package.
+# This file is distributed under the same license as the package.
 msgid ""
 msgstr ""
 "Project-Id-Version: Network Shared Media\n"
@@ -10,5 +10,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: network_shared_media.php:18
 msgid "Network Shared Media"
+msgstr ""
+
+#: network_shared_media.php:175
+msgid "Select site:"
 msgstr ""

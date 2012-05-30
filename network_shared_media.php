@@ -173,7 +173,7 @@ class network_shared_media {
 	
 		$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['name'] . '</a>';
 	}
-	echo "<li>" . __("Select blog:") . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
+	echo "<li>" . __('Select site:', 'networksharedmedia' ) . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
 	unset($blog_links);
 	?>
 	</ul>
