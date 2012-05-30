@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Netword_Shared_Media
- * @version 0.7
+ * @version 0.8
  */
 /*
 Plugin Name: Network Shared Media
@@ -9,7 +9,7 @@ Plugin URI: http://wordpress.org/extend/plugins/network-shared-media/
 Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other blogs. Based on an idea of Aaron Eaton
 Author: Joost de Keijzer
 Author URI: http://dekeijzer.org/
-Version: 0.7
+Version: 0.8
 Licence: GPLv2 or later
 */
 
