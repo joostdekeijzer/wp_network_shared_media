@@ -137,7 +137,8 @@ class network_shared_media {
 	 */
 	function media_upload_shared_media($errors) {
 		global $wpdb, $wp_query, $wp_locale, $type, $tab, $post_mime_types, $blog_id;
-	
+		$editing_blog_id = $blog_id;
+
 		media_upload_header();
 
 		$nsm_blog_id = null;
@@ -181,8 +182,9 @@ class network_shared_media {
 <?php
 		$post_id = intval($_REQUEST['post_id']);
 
-		// fix to make get_media_item add "Insert" button
-		unset($_GET['post_id']);
+		// fix to make get_media_item add "Insert" button, only needed when the "editing blog" is the main blog.
+		if( 1 == $editing_blog_id )
+			unset($_GET['post_id']);
 
 		$form_action_url = plugins_url( 'media-upload.php', __FILE__ ) . "?type=$type&tab=library&post_id=$post_id&blog_id=$blog_id";
 		$form_action_url = apply_filters('media_upload_form_url', $form_action_url, $type);
