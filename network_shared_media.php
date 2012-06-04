@@ -156,28 +156,6 @@ class network_shared_media {
 		switch_to_blog( $nsm_blog_id );
 ?>
 
-	<div style="float:none;height: 3em;margin: 0 1em;">
-	<ul class="subsubsub">
-	<?php
-	$blog_links = array();
-	if ( empty($_GET['blog_id']) )
-		$class = ' class="current"';
-	else
-		$class = '';
-	foreach ( $this->blogs as $blog ) {
-		$class = '';
-		
-		if ( $blog['blog_id'] == $blog_id )
-			$class = ' class="current"';
-	
-		$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['name'] . '</a>';
-	}
-	echo "<li>" . __('Select site:', 'networksharedmedia' ) . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
-	unset($blog_links);
-	?>
-	</ul>
-	</div>
-
 <?php
 		$post_id = intval($_REQUEST['post_id']);
 
@@ -206,7 +184,31 @@ class network_shared_media {
 	<input type="hidden" name="post_id" value="<?php echo (int) $post_id; ?>" />
 	<input type="hidden" name="blog_id" value="<?php echo (int) $blog_id; ?>" />
 	<input type="hidden" name="post_mime_type" value="<?php echo isset( $_GET['post_mime_type'] ) ? esc_attr( $_GET['post_mime_type'] ) : ''; ?>" />
+
+	<style type="text/css">
+		.nsm-site-select { float: none; height: 3em; margin: 0 1em; }
+	</style>
+
+	<ul class="subsubsub nsm-site-select">
+	<?php
+	$blog_links = array();
+	if ( empty($_GET['blog_id']) )
+		$class = ' class="current"';
+	else
+		$class = '';
+	foreach ( $this->blogs as $blog ) {
+		$class = '';
+		
+		if ( $blog['blog_id'] == $blog_id )
+			$class = ' class="current"';
 	
+		$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['name'] . '</a>';
+	}
+	echo "<li>" . __('Select site:', 'networksharedmedia' ) . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
+	unset($blog_links);
+	?>
+	</ul>
+
 	<p id="media-search" class="search-box">
 		<label class="screen-reader-text" for="media-search-input"><?php _e('Search Media');?>:</label>
 		<input type="text" id="media-search-input" name="s" value="<?php the_search_query(); ?>" />
