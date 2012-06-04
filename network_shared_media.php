@@ -140,6 +140,11 @@ class network_shared_media {
 	
 		media_upload_header();
 
+		if( count( $this->blogs ) == 0 ) {
+			echo '<form><h3 class="media-title">' . __("You don't have access to any other sites media...", 'networksharedmedia' ) . '</h3></form>';
+			return;
+		}
+
 		$nsm_blog_id = null;
 		if( !array_key_exists( 'blog_id', $_GET ) ) $_GET['blog_id'] = null;
 
@@ -204,7 +209,11 @@ class network_shared_media {
 	
 		$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['name'] . '</a>';
 	}
-	echo "<li>" . __('Select site:', 'networksharedmedia' ) . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
+	if( count($blog_links) == 1 ) {
+		echo "<li>" . __('Selected site:', 'networksharedmedia' ) . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
+	} else {
+		echo "<li>" . __('Select site:', 'networksharedmedia' ) . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
+	}
 	unset($blog_links);
 	?>
 	</ul>
