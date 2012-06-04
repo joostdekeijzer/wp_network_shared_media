@@ -191,30 +191,47 @@ class network_shared_media {
 	<input type="hidden" name="post_mime_type" value="<?php echo isset( $_GET['post_mime_type'] ) ? esc_attr( $_GET['post_mime_type'] ) : ''; ?>" />
 
 	<style type="text/css">
-		.nsm-site-select { float: none; height: 3em; margin: 0 1em; }
+		#media-upload #filter .nsm-site-select { float: none; width: 100%; margin: 0 1em 2em 1em; white-space: normal; }
 	</style>
 
 	<ul class="subsubsub nsm-site-select">
 	<?php
-	$blog_links = array();
-	if ( empty($_GET['blog_id']) )
-		$class = ' class="current"';
-	else
-		$class = '';
-	foreach ( $this->blogs as $blog ) {
-		$class = '';
-		
-		if ( $blog['blog_id'] == $blog_id )
-			$class = ' class="current"';
-	
-		$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['name'] . '</a>';
-	}
-	if( count($blog_links) == 1 ) {
-		echo "<li>" . __('Selected site:', 'networksharedmedia' ) . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
+
+	if( count( $this->blogs ) == 1 ) {
+		$blog = reset( $this->blogs );
+		echo "<li>" . __('Selected site:', 'networksharedmedia' ) . "</li>" . "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "' class='current'>" . $blog['name'] . '</a>' . '</li>';
 	} else {
-		echo "<li>" . __('Select site:', 'networksharedmedia' ) . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
+		$all_blog_names = array();
+		foreach ( $this->blogs as $blog ) {
+			$all_blog_names[] = $blog['name'];
+		}
+		if( strlen( __('Select site:', 'networksharedmedia' ) . implode( '', $all_blog_names ) ) < 71 ) {
+			$blog_links = array();
+			foreach ( $this->blogs as $blog ) {
+				$class = '';
+				
+				if ( $blog['blog_id'] == $blog_id )
+					$class = ' class="current"';
+			
+				$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['name'] . '</a>';
+			}
+			echo "<li>" . __('Select site:', 'networksharedmedia' ) . " </li>" . implode(' | </li>', $blog_links ) . '</li>';
+			unset($blog_links);
+		} else {
+			$blog_options = array();
+			foreach ( $this->blogs as $blog ) {
+				$selected = '';
+				
+				if ( $blog['blog_id'] == $blog_id )
+					$selected = ' selected="selected"';
+			
+				$blog_options[] = "<option value='{$blog['blog_id']}'{$selected}>" . $blog['name'] . '</option>';
+			}
+			echo "<li>" . __('Select site:', 'networksharedmedia' ) . "</li><li> <select name='blog_id'>" . implode('', $blog_options ) . '</select></li><li> ' . get_submit_button( __( 'Select &#187;', 'networksharedmedia' ), 'secondary', 'nsm-post-query-submit', false ) . '</li>';
+			unset($blog_options);
+		}
+		unset($all_blog_names);
 	}
-	unset($blog_links);
 	?>
 	</ul>
 
