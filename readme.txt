@@ -59,11 +59,14 @@ This plugin only shows sites which attributes are set as follows:
 
 == Changelog ==
 
+= 0.9 =
+* When many sites are available, the site-selection becomes a drop-down list (as suggested by SooBahkDo)
+
 = 0.8 =
 * fixed some embarrassing typos
 
 = 0.7 =
-* i18n (feel free to contact me for translations of the string "Netword Shared Media")
+* i18n (feel free to contact me for translations)
 * Updated read-me
 * Added screenshot
 

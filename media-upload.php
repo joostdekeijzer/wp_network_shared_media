@@ -24,7 +24,7 @@ if ( isset( $nsm_blog_id ) && isset( $nsm_send_id ) ) {
 	if (!current_user_can('upload_files')) {
 		$current_blog_name = get_bloginfo('name');
 		restore_current_blog();
-		wp_die(__('You do not have permission to upload files in blog: ')  . $current_blog_name );
+		wp_die(__('You do not have permission to upload files to site: ')  . $current_blog_name );
 	}
 
 	add_filter('media_send_to_editor', 'image_media_send_to_editor', 10, 3);
