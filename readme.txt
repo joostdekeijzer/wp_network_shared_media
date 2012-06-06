@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=joost
 Tags: multisite, network, wpmu, media, image, photo, picture, mp3, video, integration
 Requires at least: 3.3
 Tested up to:  3.4
-Stable tag: 0.8
+Stable tag: 0.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,8 @@ This plugin only shows sites which attributes are set as follows:
 
 = 0.9 =
 * When many sites are available, the site-selection becomes a drop-down list (as suggested by SooBahkDo)
+* Ignore "mature" site attribute
+* tested with WP3.4RC
 
 = 0.8 =
 * fixed some embarrassing typos
