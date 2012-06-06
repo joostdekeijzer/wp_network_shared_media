@@ -1,15 +1,15 @@
 <?php
 /**
  * @package Netword_Shared_Media
- * @version 0.8
+ * @version 0.9
  */
 /*
 Plugin Name: Network Shared Media
 Plugin URI: http://wordpress.org/extend/plugins/network-shared-media/
-Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other blogs. Based on an idea of Aaron Eaton
+Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other sites. Based on an idea of Aaron Eaton
 Author: Joost de Keijzer
 Author URI: http://dekeijzer.org/
-Version: 0.8
+Version: 0.9
 Licence: GPLv2 or later
 */
 
@@ -141,6 +141,11 @@ class network_shared_media {
 
 		media_upload_header();
 
+		if( count( $this->blogs ) == 0 ) {
+			echo '<form><h3 class="media-title">' . __("You don't have access to any other sites media...", 'networksharedmedia' ) . '</h3></form>';
+			return;
+		}
+
 		$nsm_blog_id = null;
 		if( !array_key_exists( 'blog_id', $_GET ) ) $_GET['blog_id'] = null;
 
@@ -156,28 +161,6 @@ class network_shared_media {
 
 		switch_to_blog( $nsm_blog_id );
 ?>
-
-	<div style="float:none;height: 3em;margin: 0 1em;">
-	<ul class="subsubsub">
-	<?php
-	$blog_links = array();
-	if ( empty($_GET['blog_id']) )
-		$class = ' class="current"';
-	else
-		$class = '';
-	foreach ( $this->blogs as $blog ) {
-		$class = '';
-		
-		if ( $blog['blog_id'] == $blog_id )
-			$class = ' class="current"';
-	
-		$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['name'] . '</a>';
-	}
-	echo "<li>" . __('Select site:', 'networksharedmedia' ) . "</li>" . implode(' | </li>', $blog_links ) . '</li>';
-	unset($blog_links);
-	?>
-	</ul>
-	</div>
 
 <?php
 		$post_id = intval($_REQUEST['post_id']);
@@ -208,7 +191,52 @@ class network_shared_media {
 	<input type="hidden" name="post_id" value="<?php echo (int) $post_id; ?>" />
 	<input type="hidden" name="blog_id" value="<?php echo (int) $blog_id; ?>" />
 	<input type="hidden" name="post_mime_type" value="<?php echo isset( $_GET['post_mime_type'] ) ? esc_attr( $_GET['post_mime_type'] ) : ''; ?>" />
-	
+
+	<style type="text/css">
+		#media-upload #filter .nsm-site-select { float: none; width: 100%; margin: 0 1em 2em 1em; white-space: normal; }
+	</style>
+
+	<ul class="subsubsub nsm-site-select">
+	<?php
+
+	if( count( $this->blogs ) == 1 ) {
+		$blog = reset( $this->blogs );
+		echo "<li>" . __('Selected site:', 'networksharedmedia' ) . "</li>" . "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "' class='current'>" . $blog['name'] . '</a>' . '</li>';
+	} else {
+		$all_blog_names = array();
+		foreach ( $this->blogs as $blog ) {
+			$all_blog_names[] = $blog['name'];
+		}
+		if( strlen( __('Select site:', 'networksharedmedia' ) . ' ' . implode( ' | ', $all_blog_names ) ) < 71 ) {
+			$blog_links = array();
+			foreach ( $this->blogs as $blog ) {
+				$class = '';
+				
+				if ( $blog['blog_id'] == $blog_id )
+					$class = ' class="current"';
+			
+				$blog_links[] = "<li><a href='" . esc_url(add_query_arg(array('blog_id'=>$blog['blog_id'], 'paged'=>false))) . "'$class>" . $blog['name'] . '</a>';
+			}
+			echo "<li>" . __('Select site:', 'networksharedmedia' ) . " </li>" . implode(' | </li>', $blog_links ) . '</li>';
+			unset($blog_links);
+		} else {
+			$blog_options = array();
+			foreach ( $this->blogs as $blog ) {
+				$selected = '';
+				
+				if ( $blog['blog_id'] == $blog_id )
+					$selected = ' selected="selected"';
+			
+				$blog_options[] = "<option value='{$blog['blog_id']}'{$selected}>" . $blog['name'] . '</option>';
+			}
+			echo "<li>" . __('Select site:', 'networksharedmedia' ) . "</li><li> <select name='blog_id'>" . implode('', $blog_options ) . '</select></li><li> ' . get_submit_button( __( 'Select &#187;', 'networksharedmedia' ), 'secondary', 'nsm-post-query-submit', false ) . '</li>';
+			unset($blog_options);
+		}
+		unset($all_blog_names);
+	}
+	?>
+	</ul>
+
 	<p id="media-search" class="search-box">
 		<label class="screen-reader-text" for="media-search-input"><?php _e('Search Media');?>:</label>
 		<input type="text" id="media-search-input" name="s" value="<?php the_search_query(); ?>" />

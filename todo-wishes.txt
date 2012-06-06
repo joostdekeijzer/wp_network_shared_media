@@ -3,4 +3,4 @@
 - add option to replace "media" tab altogether
 - make above option cross-network?!?
 - add "featured image" link (or don't remove it and make it work)
-- with many sites: replace links to drop-down menu
+- fix X-Frame-Options error when used in conjunction with WordPress MU Domain Mapping

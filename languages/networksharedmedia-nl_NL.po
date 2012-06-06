@@ -3,7 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Network Shared Media\n"
-"POT-Creation-Date: \n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/network_shared_media\n"
+"POT-Creation-Date: 2012-06-06 13:42:31+00:00\n"
 "PO-Revision-Date: \n"
 "Last-Translator: joost de keijzer <joost@dekeijzer.org>\n"
 "Language-Team:  <joost@dekeijzer.org>\n"
@@ -16,12 +17,52 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 # networksharedmedia
+#: media-upload.php:27
+msgid "You do not have permission to upload files to site: "
+msgstr "Je hebt geen rechten om bestanden te uploaden naar site: "
+
+# networksharedmedia
+#. #-#-#-#-#  network_shared_media.pot (Network Shared Media 0.8)  #-#-#-#-#
+#. Plugin Name of the plugin/theme
 #: network_shared_media.php:18
 msgid "Network Shared Media"
 msgstr "Netwerk Gedeelde Media"
 
 # networksharedmedia
-#: network_shared_media.php:175
+#: network_shared_media.php:144
+msgid "You don't have access to any other sites media..."
+msgstr "Je hebt geen toegang tot media van andere sites..."
+
+# networksharedmedia
+#: network_shared_media.php:202
+msgid "Selected site:"
+msgstr "Selecteer site:"
+
+# networksharedmedia
+#: network_shared_media.php:208
+#: network_shared_media.php:218
+#: network_shared_media.php:230
 msgid "Select site:"
 msgstr "Selecteer site:"
+
+# networksharedmedia
+#: network_shared_media.php:230
+msgid "Select &#187;"
+msgstr "Selecteer &#187;"
+
+#. Plugin URI of the plugin/theme
+msgid "http://wordpress.org/extend/plugins/network-shared-media/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "This plugin adds a new tab to the \"Add Media\" window, allowing you to access media in other blogs. Based on an idea of Aaron Eaton"
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Joost de Keijzer"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://dekeijzer.org/"
+msgstr ""
 
