@@ -6,7 +6,7 @@
 /*
 Plugin Name: Network Shared Media
 Plugin URI: http://wordpress.org/extend/plugins/network-shared-media/
-Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other blogs. Based on an idea of Aaron Eaton
+Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other sites. Based on an idea of Aaron Eaton
 Author: Joost de Keijzer
 Author URI: http://dekeijzer.org/
 Version: 0.8
