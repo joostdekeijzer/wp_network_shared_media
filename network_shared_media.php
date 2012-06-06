@@ -205,7 +205,7 @@ class network_shared_media {
 		foreach ( $this->blogs as $blog ) {
 			$all_blog_names[] = $blog['name'];
 		}
-		if( strlen( __('Select site:', 'networksharedmedia' ) . implode( '', $all_blog_names ) ) < 71 ) {
+		if( strlen( __('Select site:', 'networksharedmedia' ) . ' ' . implode( ' | ', $all_blog_names ) ) < 71 ) {
 			$blog_links = array();
 			foreach ( $this->blogs as $blog ) {
 				$class = '';
