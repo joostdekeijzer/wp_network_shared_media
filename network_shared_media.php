@@ -52,7 +52,7 @@ class network_shared_media {
 		foreach ( (array) $blogs as $details ) {
 			if ( !current_user_can_for_blog( $details['blog_id'], 'upload_files') || $details['blog_id'] == $this->current_blog_id ) continue;
 
-			$details['name'] = get_bloginfo('name');
+			$details['name'] = get_blog_option( $details['blog_id'], 'blogname' );
 			$this->blogs[] = $details;
 		}
 	}
