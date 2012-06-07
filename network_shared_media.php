@@ -50,13 +50,11 @@ class network_shared_media {
 		$this->blogs = array();
 
 		foreach ( (array) $blogs as $details ) {
-			switch_to_blog( $details['blog_id'] );
-			if ( !current_user_can('upload_files') || $details['blog_id'] == $this->current_blog_id ) continue;
+			if ( !current_user_can_for_blog( $details['blog_id'], 'upload_files') || $details['blog_id'] == $this->current_blog_id ) continue;
 
 			$details['name'] = get_bloginfo('name');
 			$this->blogs[] = $details;
 		}
-		switch_to_blog( $this->current_blog_id );
 	}
 
 	function wp_edit_attachments_query( $q = false, $errors ) {
