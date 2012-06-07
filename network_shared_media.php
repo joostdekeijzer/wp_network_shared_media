@@ -57,61 +57,6 @@ class network_shared_media {
 		}
 	}
 
-	function wp_edit_attachments_query( $q = false, $errors ) {
-		global $wp_query;
-		$post_mime_types = $avail_post_mime_types = array();
-		$attachment_count = 0;
-		$list_string_output = '';
-		foreach( $this->blogs as $blog ) {
-			switch_to_blog( $blog['blog_id'] );
-			if ( !current_user_can('upload_files') ) continue;
-
-			list( $more_post, $more_avail ) = wp_edit_attachments_query( $q );
-
-			if( count( $post_mime_types ) == 0 ) $post_mime_types = $more_post;
-
-			$avail_post_mime_types = array_merge( $more_avail, $avail_post_mime_types );
-			$attachment_count += $wp_query->found_posts;
-			$list_string_output .= $this->get_media_items_current_blog(null, $errors);
-		}
-		switch_to_blog( $this->current_blog_id );
-
-		$avail_post_mime_types = array_values( array_unique( $avail_post_mime_types ) );
-		return array( $post_mime_types, $avail_post_mime_types, $attachment_count, $list_string_output );
-	}
-
-	function wp_count_attachments( $mime_type = '' ) {
-		$stats = array();
-		foreach( $this->blogs as $blog ) {
-			switch_to_blog( $blog['blog_id'] );
-			if ( !current_user_can('upload_files') ) continue;
-
-			$more_stats = (array) wp_count_attachments( $mime_type );
-			foreach( $more_stats as $k => $v ) {
-				if( array_key_exists( $k, $stats ) ) {
-					$stats[$k] += $v;
-				} else {
-					$stats[$k] = $v;
-				}
-			}
-		}
-		switch_to_blog( $this->current_blog_id );
-
-		return (object) $stats;
-	}
-
-	function get_media_items_all_blogs( $post_id, $errors ) {
-		$output = '';
-		foreach( $this->blogs as $blog ) {
-			switch_to_blog( $blog['blog_id'] );
-			if ( !current_user_can('upload_files') ) continue;
-
-			$output .= $this->get_media_items( $post_id, $errors );
-		}
-		switch_to_blog( $this->current_blog_id );
-		return $output;
-	}
-
 	function get_media_items( $post_id, $errors ) {
 		global $blog_id;
 		$output = get_media_items( $post_id, $errors );
