@@ -59,6 +59,9 @@ This plugin only shows sites which attributes are set as follows:
 
 == Changelog ==
 
+= 0.9.1 =
+* some speed improvements
+
 = 0.9 =
 * When many sites are available, the site-selection becomes a drop-down list (as suggested by SooBahkDo)
 * Ignore "mature" site attribute
