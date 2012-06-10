@@ -48,13 +48,16 @@ class network_shared_media {
 		$blogs = $wpdb->get_results( $wpdb->prepare("SELECT blog_id, domain, path FROM $wpdb->blogs WHERE site_id = %d AND public = '1' AND archived = '0' AND spam = '0' AND deleted = '0' ORDER BY registered DESC", $wpdb->siteid), ARRAY_A );
 
 		$this->blogs = array();
+		$sort_array = array();
 
 		foreach ( (array) $blogs as $details ) {
 			if ( !current_user_can_for_blog( $details['blog_id'], 'upload_files') || $details['blog_id'] == $this->current_blog_id ) continue;
 
 			$details['name'] = get_blog_option( $details['blog_id'], 'blogname' );
 			$this->blogs[] = $details;
+			$sort_array[] = strtolower ( $details['name'] );
 		}
+		array_multisort( $sort_array, SORT_ASC, $this->blogs );
 	}
 
 	function get_media_items( $post_id, $errors ) {
