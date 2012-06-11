@@ -91,6 +91,9 @@ class network_shared_media {
 			return;
 		}
 
+		// set the first part of the form action url now, to the current active site, to prevent X-Frame-Options problems
+		$form_action_url = plugins_url( 'media-upload.php', __FILE__ );
+
 		$nsm_blog_id = null;
 		if( !array_key_exists( 'blog_id', $_GET ) ) $_GET['blog_id'] = null;
 
@@ -113,7 +116,7 @@ class network_shared_media {
 		// fix to make get_media_item add "Insert" button
 		unset($_GET['post_id']);
 
-		$form_action_url = plugins_url( 'media-upload.php', __FILE__ ) . "?type=$type&tab=library&post_id=$post_id&blog_id=$blog_id";
+		$form_action_url .= "?type=$type&tab=library&post_id=$post_id&blog_id=$blog_id";
 		$form_action_url = apply_filters('media_upload_form_url', $form_action_url, $type);
 
 		$form_class = 'media-upload-form validate';
