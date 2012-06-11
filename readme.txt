@@ -44,6 +44,7 @@ If a user doesn't have the 'upload_files' permission on the current (active) blo
 A site can have several attributes which can be set through /wp-admin/network/sites.php .
 
 This plugin only shows sites which attributes are set as follows:
+
 * Public: true
 * Archived: false
 * Spam: false
