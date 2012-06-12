@@ -3,4 +3,3 @@
 - add option to replace "media" tab altogether
 - make above option cross-network?!?
 - add "featured image" link (or don't remove it and make it work)
-- improve performance on slow hosts
