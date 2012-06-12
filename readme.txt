@@ -60,6 +60,9 @@ This plugin only shows sites which attributes are set as follows:
 
 == Changelog ==
 
+= 0.9.2 =
+* bugfix for cross-domain errors in "multiple domain" installations
+
 = 0.9.1 =
 * some speed improvements
 * sorting of sites

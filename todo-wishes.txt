@@ -6,5 +6,3 @@
   maybe hook to get__thumbnail_id_metadata filter ( /wp-includes/meta.php line 272)
   and add__thumbnail_id_meta action ( /wp-includes/meta.php line 62)
   but many problems ahead...
-- fix X-Frame-Options error when used in conjunction with WordPress MU Domain Mapping
-- improve performance on slow hosts
