@@ -3,8 +3,8 @@ Contributors: joostdekeijzer
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=joost@dekeijzer.org&item_name=network-shared-media+WordPress+plugin&item_number=Joost+de+Keijzer&currency_code=EUR
 Tags: multisite, network, wpmu, media, image, photo, picture, mp3, video, integration
 Requires at least: 3.3
-Tested up to:  3.3
-Stable tag: 0.8
+Tested up to:  3.4
+Stable tag: 0.9.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,18 +39,41 @@ Only blogs where the user has 'upload_files' permission are shown in the Network
 
 If a user doesn't have the 'upload_files' permission on the current (active) blog, the tab isn't shown at all since that user can't access the Add Media pop-up window.
 
+= I still can't see the site listed! =
+
+A site can have several attributes which can be set through /wp-admin/network/sites.php .
+
+This plugin only shows sites which attributes are set as follows:
+
+* Public: true
+* Archived: false
+* Spam: false
+* Delete: false
+* Mature: ignored
+
 == Screenshots ==
 1. New tab added to the Add Media popup window
+2. The Network Shared Media tab lists the media per site
+3. Show a selected image and "Insert into Post"
 
 == Upgrade Notice ==
 
 == Changelog ==
 
+= 0.9.1 =
+* some speed improvements
+* sorting of sites
+
+= 0.9 =
+* When many sites are available, the site-selection becomes a drop-down list (as suggested by SooBahkDo)
+* Ignore "mature" site attribute
+* tested with WP3.4RC
+
 = 0.8 =
 * fixed some embarrassing typos
 
 = 0.7 =
-* i18n (feel free to contact me for translations of the string "Netword Shared Media")
+* i18n (feel free to contact me for translations)
 * Updated read-me
 * Added screenshot
 
