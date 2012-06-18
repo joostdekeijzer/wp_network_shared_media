@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Netword_Shared_Media
- * @version 0.9
+ * @version 0.9.1
  */
 define('WP_ADMIN', FALSE);
 define('WP_LOAD_IMPORTERS', FALSE);

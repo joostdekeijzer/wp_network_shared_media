@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=joost
 Tags: multisite, network, wpmu, media, image, photo, picture, mp3, video, integration
 Requires at least: 3.3
 Tested up to:  3.4
-Stable tag: 0.9
+Stable tag: 0.9.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,7 @@ If a user doesn't have the 'upload_files' permission on the current (active) blo
 A site can have several attributes which can be set through /wp-admin/network/sites.php .
 
 This plugin only shows sites which attributes are set as follows:
+
 * Public: true
 * Archived: false
 * Spam: false
@@ -58,6 +59,13 @@ This plugin only shows sites which attributes are set as follows:
 == Upgrade Notice ==
 
 == Changelog ==
+
+= 0.9.2 =
+* bugfix for cross-domain errors in "multiple domain" installations
+
+= 0.9.1 =
+* some speed improvements
+* sorting of sites
 
 = 0.9 =
 * When many sites are available, the site-selection becomes a drop-down list (as suggested by SooBahkDo)
