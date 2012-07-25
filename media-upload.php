@@ -1,9 +1,9 @@
 <?php
 /**
  * @package Netword_Shared_Media
- * @version 0.9.2
+ * @version 0.9.3
  */
-define('WP_ADMIN', FALSE);
+define('WP_ADMIN', TRUE);
 define('WP_LOAD_IMPORTERS', FALSE);
 
 require_once( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/wp-admin/admin.php' );
