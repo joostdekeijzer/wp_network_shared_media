@@ -4,3 +4,6 @@
 - add option to replace "media" tab altogether
 - make above option cross-network?!?
 - add "featured image" link (or don't remove it and make it work)
+  maybe hook to get__thumbnail_id_metadata filter ( /wp-includes/meta.php line 272)
+  and add__thumbnail_id_meta action ( /wp-includes/meta.php line 62)
+  but many problems ahead...
