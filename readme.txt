@@ -56,8 +56,6 @@ This plugin only shows sites which attributes are set as follows:
 2. The Network Shared Media tab lists the media per site
 3. Show a selected image and "Insert into Post"
 
-== Upgrade Notice ==
-
 == Changelog ==
 
 = 0.9.3 =
