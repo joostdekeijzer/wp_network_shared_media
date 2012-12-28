@@ -60,6 +60,9 @@ This plugin only shows sites which attributes are set as follows:
 
 == Changelog ==
 
+= 1.0.beta =
+* WordPress 3.5 support, including new Media window
+
 = 0.9.3 =
 * Set is_admin() to true, fixing issues with Contact Form 7 (and possibly others)
 

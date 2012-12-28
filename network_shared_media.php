@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Netword_Shared_Media
- * @version 0.9.3
+ * @version 1.0.beta
  */
 /*
 Plugin Name: Network Shared Media
@@ -9,12 +9,13 @@ Plugin URI: http://wordpress.org/extend/plugins/network-shared-media/
 Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other sites. Based on an idea of Aaron Eaton
 Author: Joost de Keijzer
 Author URI: http://dekeijzer.org/
-Version: 0.9.3
+Version: 1.0.beta
 Licence: GPLv2 or later
 */
 
 // Add filter that inserts our new tab
 function network_shared_media_menu($tabs) {
+error_log( __FUNCTION__ );
 	$newtab = array('shared_media' => __('Network Shared Media', 'networksharedmedia'));
 	return array_merge($tabs, $newtab);
 }
@@ -25,11 +26,47 @@ function network_shared_media_upload_shared_media() {
 	return wp_iframe(array( $nsm, 'media_upload_shared_media' ), array());
 }
 
+function network_shared_media_view_settings( $settings, $post ) {
+	return $settings;
+}
+
+function network_shared_media_view_strings( $strings, $post ) {
+	$strings['nsmRouterItem'] = __('Network Shared Media', 'networksharedmedia');
+
+	add_action( 'print_media_templates', 'network_shared_media_print_templates' );
+
+	return $strings;
+}
+
+function network_shared_media_print_templates() {
+	echo <<<EOH
+	<script type="text/javascript">
+	jQuery(document).ready(function(){
+		wp.media.view.MediaFrame.Select.prototype.wpBrowseRouter = wp.media.view.MediaFrame.Select.prototype.browseRouter;
+		wp.media.view.MediaFrame.Select.prototype.browseRouter = function( view ) {
+			wp.media.view.MediaFrame.Select.prototype.wpBrowseRouter.apply( this, arguments );
+			view.set( {
+				nsm: {
+					text:     _wpMediaViewsL10n.nsmRouterItem,
+					priority: 60
+				}
+			});
+		};
+
+	});
+	</script>
+EOH;
+}
+
 function network_shared_media_init() {
 	if ( current_user_can('upload_files') ) {
 		load_plugin_textdomain( 'networksharedmedia', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 		add_filter('media_upload_tabs', 'network_shared_media_menu');
 		add_action('media_upload_shared_media', 'network_shared_media_upload_shared_media');
+
+		// WP >= 3.5
+		add_filter('media_view_settings', 'network_shared_media_view_settings');
+		add_filter('media_view_strings', 'network_shared_media_view_strings');
 	}
 }
 add_action( 'init', 'network_shared_media_init' );
@@ -40,8 +77,7 @@ class network_shared_media {
 	var $current_blog_id;
 
 	function __construct() {
-		global $blog_id;
-		$this->current_blog_id = $blog_id;
+		$this->current_blog_id = $GLOBALS['blog_id'];
 
 		/* copied from depricated get_blog_list */
 		global $wpdb;
@@ -50,18 +86,27 @@ class network_shared_media {
 		$this->blogs = array();
 		$sort_array = array();
 
-		foreach ( (array) $blogs as $details ) {
-			if ( !current_user_can_for_blog( $details['blog_id'], 'upload_files') || $details['blog_id'] == $this->current_blog_id ) continue;
+foreach ( (array) $blogs as $details ) {
+	switch_to_blog( $details['blog_id'] );
+	restore_current_blog();
+	//switch_to_blog( $details['blog_id'] );
+	$sites[] = get_blog_option( $details['blog_id'] , 'blogname' );
+	//restore_current_blog();
+}
+error_log( print_r( $sites, true ) );
 
-			$details['name'] = get_blog_option( $details['blog_id'], 'blogname' );
+		foreach ( (array) $blogs as $details ) {
+			if ( $details['blog_id'] == $this->current_blog_id || false || !current_user_can_for_blog( (int) $details['blog_id'], 'upload_files') ) continue;
+
+			$details['name'] = get_blog_option( (int) $details['blog_id'], 'blogname' );
 			$this->blogs[] = $details;
 			$sort_array[] = strtolower ( $details['name'] );
 		}
 		array_multisort( $sort_array, SORT_ASC, $this->blogs );
+
 	}
 
 	function get_media_items( $post_id, $errors ) {
-		global $blog_id;
 		$output = get_media_items( $post_id, $errors );
 
 		// remove edit button

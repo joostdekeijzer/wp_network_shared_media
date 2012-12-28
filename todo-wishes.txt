@@ -4,3 +4,31 @@
 - add option to replace "media" tab altogether
 - make above option cross-network?!?
 - add "featured image" link (or don't remove it and make it work)
+
+New Media window handling:
+action: query-attachments
+query: array
+  wp_ajax_query_attachments
+  WP_Query
+
+
+
+action: get-attachment
+id: ID
+
+action: save-attachment
+changes: array
+id: ID
+nonce: ..
+
+
+post thumbnail (featured image)
+wp_ajax_set_post_thumbnail /* returns html /*
+	using delete_post_thumbnail
+		  set_post_thumbnail
+post_thumbnail_meta_box
+	using _wp_post_thumbnail_html
+
+get_the_post_thumbnail
+	using the post_thumbnail_html filter
+		using 
