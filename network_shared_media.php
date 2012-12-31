@@ -31,7 +31,7 @@ function network_shared_media_view_settings( $settings, $post ) {
 }
 
 function network_shared_media_view_strings( $strings, $post ) {
-	$strings['nsmRouterItem'] = __('Network Shared Media', 'networksharedmedia');
+	$strings['myTitle'] = __('Network Shared Media test', 'networksharedmedia');
 
 	add_action( 'print_media_templates', 'network_shared_media_print_templates' );
 
@@ -41,19 +41,74 @@ function network_shared_media_view_strings( $strings, $post ) {
 function network_shared_media_print_templates() {
 	echo <<<EOH
 	<script type="text/javascript">
-	jQuery(document).ready(function(){
-		wp.media.view.MediaFrame.Select.prototype.wpBrowseRouter = wp.media.view.MediaFrame.Select.prototype.browseRouter;
-		wp.media.view.MediaFrame.Select.prototype.browseRouter = function( view ) {
-			wp.media.view.MediaFrame.Select.prototype.wpBrowseRouter.apply( this, arguments );
-			view.set( {
-				nsm: {
-					text:     _wpMediaViewsL10n.nsmRouterItem,
-					priority: 60
-				}
-			});
-		};
+		jQuery(window).on('load', function() {
+			var media   = window.wp.media,  
+			Attachment  = media.model.Attachment,
+			Attachments = media.model.Attachments,
+			Query       = media.model.Query,
+			l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n,
+			BackboneNSM;
 
-	});
+			media.controller.MyController = media.controller.State.extend({
+					id:         'my-id',
+					multiple:   false,
+					describe:   true,
+					edge:       199,
+					editing:    false,
+					sortable:   true,
+					searchable: false,
+					toolbar:    'main-gallery',
+					content:    'browse',
+					title:      l10n.myTitle,
+					priority:   100,
+					dragInfo:   true,
+
+					// Don't sync the selection, as the Edit Gallery library
+					// *is* the selection.
+					syncSelection: false
+				});
+
+			jQuery(document).on( 'click', '.insert-media', function( event ) {
+				var workflow = wp.media.editor.get();
+console.log( workflow );
+				//var workflow = wp.media.editor.get('content');
+				var options = workflow.options;
+				if( undefined == BackboneNSM ) {
+					BackboneNSM = new wp.media.view.RouterItem( _.extend( options, { text: 'NSM' } ) );
+					BackboneNSM.click = function() {
+						console.log( this );
+						var contentMode = this.options.contentMode;
+						if ( contentMode )
+							this.controller.content.mode( contentMode );
+					};
+					workflow.router.view.views.set( '.media-router', BackboneNSM, _.extend( options, { add: true } ) );
+					workflow.menu.view.views.set( '.media-menu', new wp.media.view.MenuItem( _.extend( options, { text: 'NSM Menu' } ) ), _.extend( options, { add: true } ) );
+				}
+
+				workflow.states.add(
+					new media.controller.Library({
+						id:         'my-id',
+						title:      l10n.myTitle,
+						priority:   50,
+						toolbar:    'main-insert',
+						filterable: 'all',
+						library:    media.query( options.library ),
+						multiple:   options.multiple ? 'reset' : false,
+						editable:   true,
+
+						// If the user isn't allowed to edit fields,
+						// can they still edit it locally?
+						allowLocalEdits: true,
+
+						// Show the attachment display settings.
+						displaySettings: true,
+						// Update user settings when users adjust the
+						// attachment display settings.
+						displayUserSettings: true
+					})
+				);
+			});
+		});
 	</script>
 EOH;
 }
