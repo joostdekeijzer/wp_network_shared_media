@@ -1,3 +1,6 @@
+== Issues ==
+http://wordpress.org/support/topic/some-libraries-show-broken-images
+
 == In random order ==
 
 - insert media does not work for "main" blog (blog_id=1) quickpress
