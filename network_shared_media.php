@@ -2,6 +2,15 @@
 /**
  * @package Netword_Shared_Media
  * @version 1.0.beta
+ *
+ * Voor WP3.5 Backbone systeem:
+ * Zie /wp-includes/js/media*.js files en ook de volgende ur's:
+ * http://wordpress.stackexchange.com/questions/78198/3-5-media-manager-add-css-js-to-new-tab-iframe-content/
+ * en http://wordpress.stackexchange.com/questions/76980/add-a-menu-item-to-wordpress-3-5-media-manager/
+ * en http://wordpress.stackexchange.com/questions/86884/3-5-media-manager-callout-in-metaboxes
+ * misschien algemeen: http://wordpress.stackexchange.com/questions/tagged/media-library
+ *
+ * verder ook http://scribu.net/wordpress/putting-some-backbone-into-posts-2-posts.html
  */
 /*
 Plugin Name: Network Shared Media
@@ -42,13 +51,33 @@ function network_shared_media_print_templates() {
 	echo <<<EOH
 	<script type="text/javascript">
 		jQuery(window).on('load', function() {
-			var media   = window.wp.media,  
+			var media   = window.wp.media,
 			Attachment  = media.model.Attachment,
 			Attachments = media.model.Attachments,
 			Query       = media.model.Query,
 			l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n,
 			BackboneNSM;
 
+			console.log( 'start' );
+			media.view.MediaFrame.Select.prototype.browseRouter = function( view ) {
+console.log( 'browseRouter new' );
+					view.set({
+						upload: {
+							text:     l10n.uploadFilesTitle,
+							priority: 20
+						},
+						browse: {
+							text:     l10n.mediaLibraryTitle,
+							priority: 40
+						},
+						nsm: {
+							text:     'NSM',
+							priority: 60
+						}
+					});
+				};
+			console.log( 'done' );
+/*
 			media.controller.MyController = media.controller.State.extend({
 					id:         'my-id',
 					multiple:   false,
@@ -71,18 +100,15 @@ function network_shared_media_print_templates() {
 			jQuery(document).on( 'click', '.insert-media', function( event ) {
 				var workflow = wp.media.editor.get();
 console.log( workflow );
+console.log( workflow.router.mode() );
 				//var workflow = wp.media.editor.get('content');
 				var options = workflow.options;
 				if( undefined == BackboneNSM ) {
-					BackboneNSM = new wp.media.view.RouterItem( _.extend( options, { text: 'NSM' } ) );
-					BackboneNSM.click = function() {
+					BackboneNSM = new media.view.RouterItem( _.extend( options, { text: 'NSM', click: function() {
 						console.log( this );
-						var contentMode = this.options.contentMode;
-						if ( contentMode )
-							this.controller.content.mode( contentMode );
-					};
+						this.click();
+					} } ) );
 					workflow.router.view.views.set( '.media-router', BackboneNSM, _.extend( options, { add: true } ) );
-					workflow.menu.view.views.set( '.media-menu', new wp.media.view.MenuItem( _.extend( options, { text: 'NSM Menu' } ) ), _.extend( options, { add: true } ) );
 				}
 
 				workflow.states.add(
@@ -108,6 +134,7 @@ console.log( workflow );
 					})
 				);
 			});
+*/
 		});
 	</script>
 EOH;
