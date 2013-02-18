@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Netword_Shared_Media
- * @version 0.9.1
+ * @version 0.9.4
  */
 /*
 Plugin Name: Network Shared Media
@@ -9,8 +9,10 @@ Plugin URI: http://wordpress.org/extend/plugins/network-shared-media/
 Description: This plugin adds a new tab to the "Add Media" window, allowing you to access media in other sites. Based on an idea of Aaron Eaton
 Author: Joost de Keijzer
 Author URI: http://dekeijzer.org/
-Version: 0.9.1
+Version: 0.9.4
 Licence: GPLv2 or later
+
+Code development at https://github.com/joostdekeijzer/wp_network_shared_media
 */
 
 // Add filter that inserts our new tab
@@ -64,8 +66,11 @@ class network_shared_media {
 		global $blog_id;
 		$output = get_media_items( $post_id, $errors );
 
-		// remove edit button
+		// remove edit button pre WP3.5
 		$output = preg_replace( "%<p><input type='button' id='imgedit-open-btn.+?class='imgedit-wait-spin'[^>]+></p>%s", '', $output );
+
+		//  remove edit button WP3.5+
+		$output = preg_replace( "%<p><input type='button' id='imgedit-open-btn.+?<span class='spinner'></span></p>%s", '', $output );
 
 		// remove delete link
 		$output = preg_replace( "%<a href='#' class='del-link' onclick=.+?</a>%s", '', $output );
