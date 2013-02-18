@@ -58,25 +58,16 @@ function network_shared_media_print_templates() {
 			l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n,
 			BackboneNSM;
 
-			console.log( 'start' );
+			media.view.MediaFrame.Select.prototype.preNsmBrowseRouter = media.view.MediaFrame.Select.prototype.browseRouter;
 			media.view.MediaFrame.Select.prototype.browseRouter = function( view ) {
-console.log( 'browseRouter new' );
+					media.view.MediaFrame.Select.prototype.preNsmBrowseRouter( view );
 					view.set({
-						upload: {
-							text:     l10n.uploadFilesTitle,
-							priority: 20
-						},
-						browse: {
-							text:     l10n.mediaLibraryTitle,
-							priority: 40
-						},
 						nsm: {
 							text:     'NSM',
 							priority: 60
 						}
 					});
 				};
-			console.log( 'done' );
 /*
 			media.controller.MyController = media.controller.State.extend({
 					id:         'my-id',
