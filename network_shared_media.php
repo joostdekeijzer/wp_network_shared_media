@@ -36,6 +36,47 @@ function network_shared_media_init() {
 }
 add_action( 'init', 'network_shared_media_init' );
 
+function nsm_begin_fetch_post_thumbnail_html( $post_id, $post_thumbnail_id, $size ) {
+	$new_blog = absint( get_post_meta( $post_id, '_nsm_thumbnail_blog_id', true ) );
+	if( 0 < $new_blog ) {
+		switch_to_blog( $new_blog );
+		add_action( 'end_fetch_post_thumbnail_html', 'nsm_end_fetch_post_thumbnail_html', 100, 3 );
+	}
+}
+
+function nsm_end_fetch_post_thumbnail_html( $post_id, $post_thumbnail_id, $size ) {	
+	restore_current_blog();
+	remove_action( 'end_fetch_post_thumbnail_html', 'nsm_end_fetch_post_thumbnail_html', 100, 3 );
+}
+add_action( 'begin_fetch_post_thumbnail_html', 'nsm_begin_fetch_post_thumbnail_html', 1, 3 );
+
+function nsm_admin_post_thumbnail_html( $content, $post_id ) {
+	$new_blog = absint( get_post_meta( $post_id, '_nsm_thumbnail_blog_id', true ) );
+	if( 0 < $new_blog ) {
+		$thumbnail_id = get_post_meta( $post_id, '_thumbnail_id', true );
+		$post = get_post( $post_id ); // otherwise we get the post from $new_blog!
+
+		remove_filter( 'admin_post_thumbnail_html', 'nsm_admin_post_thumbnail_html', 100, 2 );
+		switch_to_blog( $new_blog );
+		$content = _wp_post_thumbnail_html( $thumbnail_id, $post );
+		restore_current_blog();
+		add_filter( 'admin_post_thumbnail_html', 'nsm_admin_post_thumbnail_html', 100, 2 );
+	}
+	return $content;
+}
+add_filter( 'admin_post_thumbnail_html', 'nsm_admin_post_thumbnail_html', 100, 2 );
+
+function nsm_delete_post_meta( $meta_ids, $post_id, $meta_key, $_meta_value ) {
+error_log( print_r( array( $meta_ids, $post_id, $meta_key, $_meta_value ), true ) );
+	if( '_thumbnail_id' == $meta_key ) {
+		$new_blog = absint( get_post_meta( $post_id, '_nsm_thumbnail_blog_id', true ) );
+		if( 0 < $new_blog ) {
+			delete_post_meta( $post_id, '_nsm_thumbnail_blog_id', '' );
+		}
+	}
+}
+add_action( 'delete_post_meta', 'nsm_delete_post_meta', 10, 4 );
+
 class network_shared_media {
 	var $blogs = array();
 	var $media_items = '';

@@ -11,3 +11,25 @@ http://wordpress.org/support/topic/some-libraries-show-broken-images
   and add__thumbnail_id_meta action ( /wp-includes/meta.php line 62)
   but many problems ahead...
 - make gallery shortcode work with networked images (see gallery_shortcode function)
+
+== featured image support ==
+Retrieving begins in wp-includes/post-thumbnail-template.php
+1. has_post_thumbnail calls get_post_thumbanail_id()
+2. get_post_thumbnail_id returns get_post_meta
+   returns get_metadata (post.php)
+   calls apply_filters 'get_post_metadata' (meta.php) with $meta_key = _thumbnail_id && $single = true
+   So: filter get_post_metadata should return single item on meta_key = '_thumbnail_id'
+3. the_post_thumbnail echos get_the_post_thumbnail
+4. update_post_thumbnail_cache
+5. get_the_post_thumbnail calls get_post_thumbnail_id
+   does_actions 'begin_fetch_post_thumbnail_html' and 'end_fetch_post_thumbnail_html'
+   returns apply_filters 'post_thumbnail_html'
+
+Setting begins in wp-admin/includes/ajax-actions.php
+1. wp_ajax_set_post_thumbnail
+   calls delete_post_thumbnail calls delete_post_meta calls delete_metadata does action delete_post_meta
+   or calls set_post_thumbnail and _wp_post_thumbnail_html
+
+Display in admin begins in wp-admin/includes/meta-boxes.php
+1. post_thumbnail_meta_box echos _wp_post_thumbnail_html (post.php)
+   returns apply_filters admin_post_thumbnail_html
