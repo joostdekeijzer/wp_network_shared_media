@@ -290,8 +290,8 @@ class network_shared_media {
 ?>
 
 <?php
-		// fix to make get_media_item add "Insert" button, only needed when the "editing blog" is the main blog.
-		if( 1 == $editing_blog_id )
+		// fix to make get_media_item add "Insert" button, only needed when context is the main blog.
+		if( 1 == $editing_blog_id || 1 == $nsm_blog_id )
 			unset($_GET['post_id']);
 
 		$form_action_url .= "?type=$type&tab=library&post_id=$post_id&blog_id=$blog_id";
