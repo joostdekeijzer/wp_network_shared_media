@@ -1,3 +1,7 @@
+/**
+ * @package Netword_Shared_Media
+ * @version 0.9.5.dev
+ */
 function NsmSetAsThumbnail(id, blog_id, nonce){
 	var $link = jQuery('a#wp-post-thumbnail-' + id);
 

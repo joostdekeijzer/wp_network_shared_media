@@ -58,6 +58,9 @@ This plugin only shows sites which attributes are set as follows:
 
 == Changelog ==
 
+= 0.9.5.dev =
+* Alpha: Featured Image support!
+
 = 0.9.4 =
 * Minor bugfix for WP3.5 (remove the "Edit picture" button)
 
