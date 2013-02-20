@@ -24,6 +24,7 @@ function network_shared_media_menu($tabs) {
 // Load media_nsm_process() into the existing iframe
 function network_shared_media_upload_shared_media() {
 	$nsm = new network_shared_media();
+	wp_enqueue_script( 'nsm-set-post-thumbnail', plugin_dir_url( __FILE__ ) . 'js/nsm-set-post-thumbnail.js', array( 'jquery' ), false, 1 );
 	return wp_iframe(array( $nsm, 'media_upload_shared_media' ), array());
 }
 
@@ -53,7 +54,7 @@ add_action( 'begin_fetch_post_thumbnail_html', 'nsm_begin_fetch_post_thumbnail_h
 function nsm_admin_post_thumbnail_html( $content, $post_id ) {
 	$new_blog = absint( get_post_meta( $post_id, '_nsm_thumbnail_blog_id', true ) );
 	if( 0 < $new_blog ) {
-		$thumbnail_id = get_post_meta( $post_id, '_thumbnail_id', true );
+		$thumbnail_id = intval( get_post_meta( $post_id, '_thumbnail_id', true ) );
 		$post = get_post( $post_id ); // otherwise we get the post from $new_blog!
 
 		remove_filter( 'admin_post_thumbnail_html', 'nsm_admin_post_thumbnail_html', 100, 2 );
@@ -67,7 +68,6 @@ function nsm_admin_post_thumbnail_html( $content, $post_id ) {
 add_filter( 'admin_post_thumbnail_html', 'nsm_admin_post_thumbnail_html', 100, 2 );
 
 function nsm_delete_post_meta( $meta_ids, $post_id, $meta_key, $_meta_value ) {
-error_log( print_r( array( $meta_ids, $post_id, $meta_key, $_meta_value ), true ) );
 	if( '_thumbnail_id' == $meta_key ) {
 		$new_blog = absint( get_post_meta( $post_id, '_nsm_thumbnail_blog_id', true ) );
 		if( 0 < $new_blog ) {
@@ -76,6 +76,69 @@ error_log( print_r( array( $meta_ids, $post_id, $meta_key, $_meta_value ), true 
 	}
 }
 add_action( 'delete_post_meta', 'nsm_delete_post_meta', 10, 4 );
+
+/**
+ * Mainly copied from wp_ajax_set_post_thumbnail()
+ */
+function nsm_ajax_set_post_thumbnail() {
+	$json = ! empty( $_REQUEST['json'] ); // New-style request
+
+	$post_ID = intval( $_POST['post_id'] );
+	if ( ! current_user_can( 'edit_post', $post_ID ) )
+		wp_die( -1 );
+
+	$thumbnail_id = intval( $_POST['thumbnail_id'] );
+
+	if ( $json )
+		check_ajax_referer( "update-post_$post_ID" );
+	else
+		check_ajax_referer( "set_post_thumbnail-$post_ID" );
+
+	if ( $thumbnail_id == '-1' ) {
+		if ( delete_post_thumbnail( $post_ID ) ) {
+			$return = _wp_post_thumbnail_html( null, $post_ID );
+			$json ? wp_send_json_success( $return ) : wp_die( $return );
+		} else {
+			wp_die( 0 );
+		}
+	}
+
+	// custom set_post_thumbnail logic
+	$new_blog = absint( $_POST['blog_id'] );
+	$success = false;
+	if( 0 < $new_blog ) {
+		$post = get_post( $post_ID ); // otherwise we get the post from $new_blog!
+		$thumbnail_id = absint( $thumbnail_id );
+		$action = 'none';
+		switch_to_blog( $new_blog );
+		if( $post && $thumbnail_id && get_post( $thumbnail_id ) ) {
+			if( $thumbnail_html = wp_get_attachment_image( $thumbnail_id, 'thumbnail' ) ) {
+				$action = 'update_post_meta';
+			} else {
+				$action = 'delete_post_meta';
+			}
+		}
+		restore_current_blog();
+		switch( $action ) {
+		case 'update_post_meta':
+			$success = wp_update_post_meta( $post->ID, '_thumbnail_id', $thumbnail_id ) && wp_update_post_meta( $post->ID, '_nsm_thumbnail_blog_id', $new_blog );
+			break;
+		case 'delete_post_meta':
+			$success = delete_post_meta( $post->ID, '_thumbnail_id' );
+			break;
+		case 'none':
+		default:
+			// nothing!
+		}
+	}
+	if ( $success ) {
+		$return = _wp_post_thumbnail_html( $thumbnail_id, $post_ID );
+		$json ? wp_send_json_success( $return ) : wp_die( $return );
+	}
+
+	wp_die( 0 );
+}
+add_action( 'wp_ajax_nsm-set-post-thumbnail', 'nsm_ajax_set_post_thumbnail' );
 
 class network_shared_media {
 	var $blogs = array();
@@ -103,19 +166,72 @@ class network_shared_media {
 		array_multisort( $sort_array, SORT_ASC, $this->blogs );
 	}
 
-	function get_media_items( $post_id, $errors ) {
-		global $blog_id;
-		$output = get_media_items( $post_id, $errors );
+	/**
+	 * Modified version of wp-admin/includes/media.php verion
+	 */
+	function get_media_items( $post_id, $errors, $post_thumbnail_settings ) {
+		$attachments = array();
+		if ( $post_id ) {
+			$post = get_post($post_id);
+			if ( $post && $post->post_type == 'attachment' )
+				$attachments = array($post->ID => $post);
+			else
+				$attachments = get_children( array( 'post_parent' => $post_id, 'post_type' => 'attachment', 'orderby' => 'menu_order ASC, ID', 'order' => 'DESC') );
+		} else {
+			if ( is_array($GLOBALS['wp_the_query']->posts) )
+				foreach ( $GLOBALS['wp_the_query']->posts as $attachment )
+					$attachments[$attachment->ID] = $attachment;
+		}
+
+		$output = '';
+		foreach ( (array) $attachments as $id => $attachment ) {
+			if ( $attachment->post_status == 'trash' )
+				continue;
+			if ( $item = $this->get_media_item( $id, array( 'errors' => isset($errors[$id]) ? $errors[$id] : null), $post_thumbnail_settings ) )
+				$output .= "\n<div id='media-item-$id' class='media-item child-of-$attachment->post_parent preloaded'><div class='progress hidden'><div class='bar'></div></div><div id='media-upload-error-$id' class='hidden'></div><div class='filename hidden'></div>$item\n</div>";
+		}
+
+		return $output;
+	}
+
+	/**
+	 * Modified version of wp-admin/includes/media.php verion
+	 */
+	function get_media_item( $attachment_id, $args = null, $post_thumbnail_settings = array() ) {
+		$output = get_media_item( $attachment_id, $args );
 
 		// remove edit button pre WP3.5
-		$output = preg_replace( "%<p><input type='button' id='imgedit-open-btn.+?class='imgedit-wait-spin'[^>]+></p>%s", '', $output );
+		$output = preg_replace( "%<p><input type='button' id='imgedit-open-btn-$attachment_id.+?class='imgedit-wait-spin'[^>]+></p>%s", '', $output );
 
 		//  remove edit button WP3.5+
-		$output = preg_replace( "%<p><input type='button' id='imgedit-open-btn.+?<span class='spinner'></span></p>%s", '', $output );
+		$output = preg_replace( "%<p><input type='button' id='imgedit-open-btn-$attachment_id.+?<span class='spinner'></span></p>%s", '', $output );
 
 		// remove delete link
 		$output = preg_replace( "%<a href='#' class='del-link' onclick=.+?</a>%s", '', $output );
 		$output = preg_replace( "%<div id='del_attachment_.+?</div>%s", '', $output );
+
+		/**
+		 * featured-image logic
+		 */
+		// first: remove the link
+		$output = preg_replace( "%<a class='wp-post-thumbnail' id='wp-post-thumbnail-$attachment_id.+?</a>%s", '', $output );
+
+		// now: add new nsm-logic
+		$post = get_post( $attachment_id );
+		$post_mime_types = get_post_mime_types();
+		$keys = array_keys( wp_match_mime_types( array_keys( $post_mime_types ), $post->post_mime_type ) );
+		$type = array_shift( $keys );
+
+		$thumbnail = '';
+		if(
+			isset( $post_thumbnail_settings['supported'] ) && $post_thumbnail_settings['supported']
+			&& 'image' == $type
+			//&& ( $GLOBALS['blog_id'] != $post_thumbnail_settings['_nsm_thumbnail_blog_id'] || $attachment_id != $post_thumbnail_settings['_thumbnail_id'] )
+		) {
+			$thumbnail = "<a class='wp-post-thumbnail' id='wp-post-thumbnail-" . $attachment_id . "' href='#' onclick='NsmSetAsThumbnail(\"$attachment_id\", \"{$GLOBALS['blog_id']}\", \"{$post_thumbnail_settings['ajax_nonce']}\");return false;'>" . esc_html__( "Use as featured image" ) . "</a>";
+		}
+		if( strlen( $thumbnail ) > 0 )
+			$output = preg_replace( "%(<td class='savesend'>.+?)</td>%s", "$1$thumbnail</td>", $output );
 
 		return $output;
 	}
@@ -154,12 +270,26 @@ class network_shared_media {
 		if( null == $nsm_blog_id )
 			$nsm_blog_id = $this->blogs[0]['blog_id'];
 
+		$post_id = intval($_REQUEST['post_id']);
+
+		// prepare post_thumbnail info
+		$post_thumbnail_settings = array( 'supported' => false );
+		if(
+			current_theme_supports( 'post-thumbnails', get_post_type( $post_id ) )
+			&& post_type_supports( get_post_type( $post_id ), 'thumbnail' )
+		) {
+			$post_thumbnail_settings = array(
+				'supported'              => true,
+				'ajax_nonce'             => wp_create_nonce( "set_post_thumbnail-$post_id" ),
+				'_thumbnail_id'          => get_post_meta( $post_id, '_thumbnail_id', true ),
+				'_nsm_thumbnail_blog_id' => get_post_meta( $post_id, '_nsm_thumbnail_blog_id', true ),
+			);
+		}
+
 		switch_to_blog( $nsm_blog_id );
 ?>
 
 <?php
-		$post_id = intval($_REQUEST['post_id']);
-
 		// fix to make get_media_item add "Insert" button, only needed when the "editing blog" is the main blog.
 		if( 1 == $editing_blog_id )
 			unset($_GET['post_id']);
@@ -349,7 +479,7 @@ class network_shared_media {
 	
 	<div id="media-items">
 	<?php add_filter('attachment_fields_to_edit', 'media_post_single_attachment_fields_to_edit', 10, 2); ?>
-	<?php echo $this->get_media_items(null, $errors); ?>
+	<?php echo $this->get_media_items( null, $errors, $post_thumbnail_settings ); ?>
 	</div>
 	<p class="ml-submit"></p>
 	</form>
