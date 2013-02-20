@@ -121,7 +121,7 @@ function nsm_ajax_set_post_thumbnail() {
 		restore_current_blog();
 		switch( $action ) {
 		case 'update_post_meta':
-			$success = wp_update_post_meta( $post->ID, '_thumbnail_id', $thumbnail_id ) && wp_update_post_meta( $post->ID, '_nsm_thumbnail_blog_id', $new_blog );
+			$success = update_post_meta( $post->ID, '_thumbnail_id', $thumbnail_id ) && update_post_meta( $post->ID, '_nsm_thumbnail_blog_id', $new_blog );
 			break;
 		case 'delete_post_meta':
 			$success = delete_post_meta( $post->ID, '_thumbnail_id' );
