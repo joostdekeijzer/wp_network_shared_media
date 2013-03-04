@@ -10,6 +10,9 @@
  * en http://wordpress.stackexchange.com/questions/86884/3-5-media-manager-callout-in-metaboxes
  * misschien algemeen: http://wordpress.stackexchange.com/questions/tagged/media-library
  *
+ * ook: http://shibashake.com/wordpress-theme/how-to-add-the-wordpress-3-5-media-manager-interface
+ * en http://shibashake.com/wordpress-theme/how-to-add-the-wordpress-3-5-media-manager-interface-part-2
+ *
  * verder ook http://scribu.net/wordpress/putting-some-backbone-into-posts-2-posts.html
  */
 /*
