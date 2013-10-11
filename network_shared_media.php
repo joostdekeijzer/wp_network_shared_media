@@ -59,18 +59,8 @@ function network_shared_media_print_templates() {
 			Attachments = media.model.Attachments,
 			Query       = media.model.Query,
 			l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n,
-			BackboneNSM;
 
-// for debug : trace every event
-/*
-var originalTrigger = media.view.MediaFrame.Select.prototype.trigger;
-media.view.MediaFrame.Select.prototype.trigger = function(){
-    console.log('Event Triggered:', arguments);
-    originalTrigger.apply(this, Array.prototype.slice.call(arguments));
-}
-*/
-
-			media.view.MediaFrame.Select.prototype.nsm = {
+			nsmView = {
 				bindHandlers: media.view.MediaFrame.Select.prototype.bindHandlers,
 				browseRouter: function( view ) {
 					view.set({
@@ -79,76 +69,45 @@ media.view.MediaFrame.Select.prototype.trigger = function(){
 							priority: 60
 						}
 					});
-				}
-			};
-			media.view.MediaFrame.Select.prototype.bindHandlers = function() {
-				this.nsm.bindHandlers.call(this);
+				},
+				createView: function( content ) {
+					console.log('create NSM');
 
-				this.on( 'router:render:browse', this.nsm.browseRouter, this );
-				this.on( 'content:create:nsm', function() { console.log('create NSM'); } );
-				this.on( 'content:render:nsm', function() { console.log('render NSM'); } );
-				this.on( 'content:activate:nsm', function() { console.log('activate NSM'); } );
-				this.on( 'content:deactivate:nsm', function() { console.log('deactivate NSM'); } );
+					var state = this.state();
+
+					this.\$el.removeClass('hide-toolbar');
+
+					content.view = new media.view.AttachmentsBrowser({
+						controller: this,
+						collection: state.get('library'),
+						selection:  state.get('selection'),
+						model:      state,
+						sortable:   state.get('sortable'),
+						search:     state.get('searchable'),
+						filters:    state.get('filterable'),
+						display:    state.get('displaySettings'),
+						dragInfo:   state.get('dragInfo'),
+
+						AttachmentView: state.get('AttachmentView')
+					});
+				},
+				renderView: function() { console.log('render NSM'); },
+				activateView: function() { console.log('render NSM'); },
+				deactivateView: function() { console.log('deactivate NSM'); },
+			};
+			_.extend(nsmView, media.view.MediaFrame.prototype);
+
+			media.view.MediaFrame.Select.prototype.bindHandlers = function() {
+				nsmView.bindHandlers.call(this);
+
+				this.on( 'router:render:browse', nsmView.browseRouter, this );
+
+				this.on( 'content:create:nsm', nsmView.createView, this );
+				this.on( 'content:render:nsm', nsmView.renderView, this );
+				this.on( 'content:activate:nsm', nsmView.activateView, this );
+				this.on( 'content:deactivate:nsm', nsmView.deactivateView, this );
 			}
 
-/*
-			media.controller.MyController = media.controller.State.extend({
-					id:         'my-id',
-					multiple:   false,
-					describe:   true,
-					edge:       199,
-					editing:    false,
-					sortable:   true,
-					searchable: false,
-					toolbar:    'main-gallery',
-					content:    'browse',
-					title:      l10n.nsmTitle,
-					priority:   100,
-					dragInfo:   true,
-
-					// Don't sync the selection, as the Edit Gallery library
-					// *is* the selection.
-					syncSelection: false
-				});
-
-			jQuery(document).on( 'click', '.insert-media', function( event ) {
-				var workflow = wp.media.editor.get();
-console.log( workflow );
-console.log( workflow.router.mode() );
-				//var workflow = wp.media.editor.get('content');
-				var options = workflow.options;
-				if( undefined == BackboneNSM ) {
-					BackboneNSM = new media.view.RouterItem( _.extend( options, { text: 'NSM', click: function() {
-						console.log( this );
-						this.click();
-					} } ) );
-					workflow.router.view.views.set( '.media-router', BackboneNSM, _.extend( options, { add: true } ) );
-				}
-
-				workflow.states.add(
-					new media.controller.Library({
-						id:         'my-id',
-						title:      l10n.myTitle,
-						priority:   50,
-						toolbar:    'main-insert',
-						filterable: 'all',
-						library:    media.query( options.library ),
-						multiple:   options.multiple ? 'reset' : false,
-						editable:   true,
-
-						// If the user isn't allowed to edit fields,
-						// can they still edit it locally?
-						allowLocalEdits: true,
-
-						// Show the attachment display settings.
-						displaySettings: true,
-						// Update user settings when users adjust the
-						// attachment display settings.
-						displayUserSettings: true
-					})
-				);
-			});
-*/
 		});
 	</script>
 EOH;
