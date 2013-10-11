@@ -43,7 +43,7 @@ function network_shared_media_view_settings( $settings, $post ) {
 }
 
 function network_shared_media_view_strings( $strings, $post ) {
-	$strings['myTitle'] = __('Network Shared Media test', 'networksharedmedia');
+	$strings['nsmTitle'] = __('Network Shared Media', 'networksharedmedia');
 
 	add_action( 'print_media_templates', 'network_shared_media_print_templates' );
 
@@ -66,7 +66,7 @@ function network_shared_media_print_templates() {
 					media.view.MediaFrame.Select.prototype.preNsmBrowseRouter( view );
 					view.set({
 						nsm: {
-							text:     'NSM',
+							text:     l10n.nsmTitle,
 							priority: 60
 						}
 					});
@@ -82,7 +82,7 @@ function network_shared_media_print_templates() {
 					searchable: false,
 					toolbar:    'main-gallery',
 					content:    'browse',
-					title:      l10n.myTitle,
+					title:      l10n.nsmTitle,
 					priority:   100,
 					dragInfo:   true,
 
