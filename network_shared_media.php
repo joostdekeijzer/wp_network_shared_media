@@ -62,6 +62,18 @@ function network_shared_media_print_templates() {
 
 			nsmView = {
 				bindHandlers: media.view.MediaFrame.Select.prototype.bindHandlers,
+				createStates: function( selectView ) {
+					var options = selectView.options;
+					selectView.states.add([
+						new media.controller.Library({
+							library:   media.query( options.library ),
+							multiple:  options.multiple,
+							title:     options.title,
+							priority:  60
+						})
+					]);
+				},
+
 				browseRouter: function( view ) {
 					view.set({
 						nsm: {
@@ -98,7 +110,9 @@ function network_shared_media_print_templates() {
 			_.extend(nsmView, media.view.MediaFrame.prototype);
 
 			media.view.MediaFrame.Select.prototype.bindHandlers = function() {
-				nsmView.bindHandlers.call(this);
+				//nsmView.createStates( this );
+
+				nsmView.bindHandlers.call( this );
 
 				this.on( 'router:render:browse', nsmView.browseRouter, this );
 
