@@ -70,19 +70,21 @@ media.view.MediaFrame.Select.prototype.trigger = function(){
 }
 */
 
-			media.view.MediaFrame.Select.prototype.nsmBrowseRouter = function( view ) {
-				view.set({
-					nsm: {
-						text:     l10n.nsmTitle,
-						priority: 60
-					}
-				});
-			}
-			media.view.MediaFrame.Select.prototype.preNsmBindHandlers = media.view.MediaFrame.Select.prototype.bindHandlers;
+			media.view.MediaFrame.Select.prototype.nsm = {
+				bindHandlers: media.view.MediaFrame.Select.prototype.bindHandlers,
+				browseRouter: function( view ) {
+					view.set({
+						nsm: {
+							text:     l10n.nsmTitle,
+							priority: 60
+						}
+					});
+				}
+			};
 			media.view.MediaFrame.Select.prototype.bindHandlers = function() {
-				media.view.MediaFrame.Select.prototype.preNsmBindHandlers.call(this);
+				this.nsm.bindHandlers.call(this);
 
-				this.on( 'router:render:browse', this.nsmBrowseRouter, this );
+				this.on( 'router:render:browse', this.nsm.browseRouter, this );
 				this.on( 'content:create:nsm', function() { console.log('create NSM'); } );
 				this.on( 'content:render:nsm', function() { console.log('render NSM'); } );
 				this.on( 'content:activate:nsm', function() { console.log('activate NSM'); } );
