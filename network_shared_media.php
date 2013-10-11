@@ -61,6 +61,15 @@ function network_shared_media_print_templates() {
 			l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n,
 			BackboneNSM;
 
+// for debug : trace every event
+/*
+var originalTrigger = media.view.MediaFrame.Select.prototype.trigger;
+media.view.MediaFrame.Select.prototype.trigger = function(){
+    console.log('Event Triggered:', arguments);
+    originalTrigger.apply(this, Array.prototype.slice.call(arguments));
+}
+*/
+
 			media.view.MediaFrame.Select.prototype.preNsmBrowseRouter = media.view.MediaFrame.Select.prototype.browseRouter;
 			media.view.MediaFrame.Select.prototype.browseRouter = function( view ) {
 					media.view.MediaFrame.Select.prototype.preNsmBrowseRouter( view );
@@ -70,6 +79,10 @@ function network_shared_media_print_templates() {
 							priority: 60
 						}
 					});
+					this.on( 'content:create:nsm', function() { console.log('create NSM'); } );
+					this.on( 'content:render:nsm', function() { console.log('render NSM'); } );
+					this.on( 'content:activate:nsm', function() { console.log('activate NSM'); } );
+					this.on( 'content:deactivate:nsm', function() { console.log('deactivate NSM'); } );
 				};
 /*
 			media.controller.MyController = media.controller.State.extend({
