@@ -143,6 +143,9 @@ class network_shared_media {
 	<input type="hidden" name="post_id" value="<?php echo (int) $post_id; ?>" />
 	<input type="hidden" name="blog_id" value="<?php echo (int) $blog_id; ?>" />
 	<input type="hidden" name="post_mime_type" value="<?php echo isset( $_GET['post_mime_type'] ) ? esc_attr( $_GET['post_mime_type'] ) : ''; ?>" />
+	<?php if( isset($_GET['chromeless']) ) : ?>
+	<input type="hidden" name="chromeless" value="<?php echo (bool) $_GET['chromeless']; ?>" />
+	<?php endif; ?>
 
 	<style type="text/css">
 		#media-upload #filter .nsm-site-select { float: none; width: 100%; margin: 0 1em 2em 1em; white-space: normal; }
