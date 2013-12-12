@@ -3,8 +3,8 @@ Contributors: joostdekeijzer
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=joost@dekeijzer.org&item_name=network-shared-media+WordPress+plugin&item_number=Joost+de+Keijzer&currency_code=EUR
 Tags: multisite, network, wpmu, media, image, photo, picture, mp3, video, integration
 Requires at least: 3.3
-Tested up to:  3.8-beta
-Stable tag: 0.9.5
+Tested up to:  3.8
+Stable tag: 0.9.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -57,6 +57,10 @@ This plugin only shows sites which attributes are set as follows:
 3. Show a selected image and "Insert into Post"
 
 == Changelog ==
+
+= 0.9.6 =
+* Bugfix where, after selecting an image, reopening the Media Browser would result in an empty screen.
+* Tested with WordPress 3.8.
 
 = 0.9.5 =
 * Added translations for Spanish (es_ES by Juan Ignacio Rodriguez) and Serbo-Croatian (sr_RS by Borisa Djuraskovic). Thank you!
