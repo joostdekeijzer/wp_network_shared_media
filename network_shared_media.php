@@ -294,7 +294,36 @@ class network_shared_media {
 	
 	<?php wp_nonce_field('media-form'); ?>
 	<?php //media_upload_form( $errors ); ?>
-	
+
+	<?php
+		if( isset($_GET['chromeless']) && $_GET['chromeless'] ):
+			// WP3.5+ Media Browser calls iframe 'chromeless' and handles inserting differently
+	?>
+	<script type="text/javascript">
+	/* <![CDATA[ */
+	function nsm_media_send_to_editor(htmlString) {
+		<?php /* copied from /wp-admin/includes/media.php media_send_to_editor() */ ?>
+		var win = window.dialogArguments || opener || parent || top;
+		win.send_to_editor(htmlString);
+	}
+
+	jQuery(function($){
+		$('input[id^=send].button').click(function(event) {
+			event.preventDefault();
+			var $this = $(event.target);
+			var form = $('#library-form');
+			var result = $.ajax({
+				url: form.attr('action'),
+				type: form.attr('method'),
+				data: form.serialize() + '&' + encodeURIComponent($this.attr('id') ) + '=true&chromeless=1',
+				success: nsm_media_send_to_editor
+			});
+		});
+	});
+	/* ]]> */
+	</script>
+	<?php endif; /* chromeless */ ?>
+
 	<script type="text/javascript">
 	<!--
 	jQuery(function($){

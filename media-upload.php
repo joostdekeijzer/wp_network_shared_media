@@ -50,5 +50,10 @@ if ( isset( $nsm_blog_id ) && isset( $nsm_send_id ) ) {
 
 	$html = get_image_send_to_editor($attachment_id, $attachment['post_excerpt'], $attachment['post_title'], $align, $url, $rel, $size, $alt);
 
-	return media_send_to_editor($html);
+	if( isset($_POST['chromeless']) && $_POST['chromeless'] ) {
+		// WP3.5+ media browser is identified by the 'chromeless' parameter
+		exit($html);
+	} else {
+		return media_send_to_editor($html);
+	}
 }
