@@ -15,7 +15,8 @@ if (!current_user_can('upload_files'))
 
 if( isset( $_POST['send'] ) ) {
 	$nsm_blog_id = (int) $_GET['blog_id'];
-	$nsm_send_id = (int) reset( array_keys( $_POST['send'] ) );
+	reset( $_POST['send'] );
+	$nsm_send_id = (int) key( $_POST['send'] );
 }
 
 /* copied from media.php media_upload_form_handler */
