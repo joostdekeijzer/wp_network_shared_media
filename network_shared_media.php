@@ -62,9 +62,11 @@ function network_shared_media_print_templates() {
 				Query       = media.model.Query,
 				l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
 
-				nsmAttachment = media.model.nsmAttachment = media.model.Attachment.extend({});
+				var nsmAttachment = media.model.nsmAttachment = media.model.Attachment.extend({
+					fetch: function() { console.log( 'nsmAttachment fetch' ); }
+				});
 
-				nsmAttachments = media.model.nsmAttachments = media.model.Attachments.extend({
+				var nsmAttachments = media.model.nsmAttachments = media.model.Attachments.extend({
 					model: nsmAttachment,
 					fetch: function() { console.log( 'nsmAttachments fetch' ); },
 					sync: function () { console.log( 'nsmAttachments sync' ); },
