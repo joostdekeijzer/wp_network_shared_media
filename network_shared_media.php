@@ -54,74 +54,180 @@ function network_shared_media_print_templates() {
 	echo <<<EOH
 	<script type="text/javascript">
 		jQuery(window).on('load', function() {
-			var media   = window.wp.media,
-			Attachment  = media.model.Attachment,
-			Attachments = media.model.Attachments,
-			Query       = media.model.Query,
-			l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n,
+			// models
+			(function($) {
+				var media   = window.wp.media,
+				Attachment  = media.model.Attachment,
+				Attachments = media.model.Attachments,
+				Query       = media.model.Query,
+				l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
 
-			nsmView = {
-				bindHandlers: media.view.MediaFrame.Select.prototype.bindHandlers,
-				createStates: function( selectView ) {
-					var options = selectView.options;
-					selectView.states.add([
-						new media.controller.Library({
-							library:   media.query( options.library ),
-							multiple:  options.multiple,
-							title:     options.title,
-							priority:  60
-						})
-					]);
-				},
+				nsmAttachment = media.model.nsmAttachment = media.model.Attachment.extend({});
 
-				browseRouter: function( view ) {
-					view.set({
-						nsm: {
-							text:     l10n.nsmTitle,
-							priority: 60
+				nsmAttachments = media.model.nsmAttachments = media.model.Attachments.extend({
+					model: nsmAttachment,
+					fetch: function() { console.log( 'nsmAttachments fetch' ); },
+					sync: function () { console.log( 'nsmAttachments sync' ); },
+					parse: function( resp, xhr ) {
+						console.log( 'nsmAttachments parse' );
+						if ( ! _.isArray( resp ) ) {
+							resp = [resp];
 						}
-					});
-				},
-				createView: function( content ) {
-					console.log('create NSM');
 
-					var state = this.state();
+						return _.map( resp, function( attrs ) {
+							var id, attachment, newAttributes;
 
-					this.\$el.removeClass('hide-toolbar');
+							if ( attrs instanceof Backbone.Model ) {
+								id = attrs.get( 'id' );
+								attrs = attrs.attributes;
+							} else {
+								id = attrs.id;
+							}
 
-					content.view = new media.view.AttachmentsBrowser({
-						controller: this,
-						collection: state.get('library'),
-						selection:  state.get('selection'),
-						model:      state,
-						sortable:   state.get('sortable'),
-						search:     state.get('searchable'),
-						filters:    state.get('filterable'),
-						display:    state.get('displaySettings'),
-						dragInfo:   state.get('dragInfo'),
+							attachment = nsmAttachment.get( id );
+							newAttributes = attachment.parse( attrs, xhr );
 
-						AttachmentView: state.get('AttachmentView')
-					});
-				},
-				renderView: function() { console.log('render NSM'); },
-				activateView: function() { console.log('render NSM'); },
-				deactivateView: function() { console.log('deactivate NSM'); },
-			};
-			_.extend(nsmView, media.view.MediaFrame.prototype);
+							if ( ! _.isEqual( attachment.attributes, newAttributes ) ) {
+								attachment.set( newAttributes );
+							}
 
-			media.view.MediaFrame.Select.prototype.bindHandlers = function() {
-				//nsmView.createStates( this );
+							return attachment;
+						});
+					}
+				});
+			}(jQuery));
 
-				nsmView.bindHandlers.call( this );
+			// views & controllers
+			(function($) {
+				var media   = window.wp.media,
+				Attachment  = media.model.Attachment,
+				nsmAttachment  = media.model.nsmAttachment,
+				Attachments = media.model.Attachments,
+				nsmAttachments = media.model.nsmAttachments,
+				Query       = media.model.Query,
+				l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
 
-				this.on( 'router:render:browse', nsmView.browseRouter, this );
+				nsmAttachmentsBrowser = media.view.nsmAttachmentsBrowser = media.view.AttachmentsBrowser.extend({
+					__createAttachments: function() {
+						this.removeContent();
 
-				this.on( 'content:create:nsm', nsmView.createView, this );
-				this.on( 'content:render:nsm', nsmView.renderView, this );
-				this.on( 'content:activate:nsm', nsmView.activateView, this );
-				this.on( 'content:deactivate:nsm', nsmView.deactivateView, this );
-			}
+						this.attachments = new nsmAttachment({
+							controller: this.controller,
+							collection: this.collection,
+							selection:  this.options.selection,
+							model:      this.model,
+							sortable:   this.options.sortable,
 
+							// The single `Attachment` view to be used in the `Attachments` view.
+							AttachmentView: this.options.AttachmentView
+						});
+
+						this.views.add( this.attachments );
+					}
+				});
+
+				nsmAttachment = media.view.nsmAttachment = media.view.Attachment.extend({
+					className: 'attachment nsm-attachment',
+
+					initialize: function() {
+	console.log('nsmAttachment initialize');
+						Attachment.prototype.initialize.apply( this, arguments );
+					},
+
+					/**
+					 * Only the read method is allowed
+					 */
+					sync: function( method, model, options ) {
+	console.log('nsmAttachment sync');
+						// If the attachment does not yet have an `id`, return an instantly
+						// rejected promise. Otherwise, all of our requests will fail.
+						if ( _.isUndefined( this.id ) ) {
+							return $.Deferred().rejectWith( this ).promise();
+						}
+
+						// Overload the `read` request so Attachment.fetch() functions correctly.
+						if ( 'read' === method ) {
+							options = options || {};
+							options.context = this;
+							options.data = _.extend( options.data || {}, {
+								action: 'get-attachment',
+								id: this.id
+							});
+							return media.ajax( options );
+						}
+						return $.Deferred().rejectWith( this ).promise();
+					}
+				});
+
+				nsmView = {
+					bindHandlers: media.view.MediaFrame.Select.prototype.bindHandlers,
+					createStates: function( selectView ) {
+						var options = selectView.options;
+
+						selectView.states.add([
+							new media.controller.Library({
+								id:        'nsm-library',
+								library:   new nsmAttachments( null, {
+									props: options.library
+								}),
+								multiple:  options.multiple,
+								title:     options.title,
+								priority:  60
+							})
+						]);
+					},
+
+					browseRouter: function( view ) {
+						view.set({
+							nsm_browse: {
+								text:     l10n.nsmTitle,
+								priority: 60
+							}
+						});
+					},
+					createView: function( content ) {
+						console.log('create NSM');
+
+						//if ( ! this.get('nsmLibrary') ) {
+						//	this.set( 'nsmLibrary', media.query() );
+						//}
+
+						var state = this.state('nsm-library');
+
+						this.\$el.removeClass('hide-toolbar');
+
+						content.view = new nsmAttachmentsBrowser({
+							controller: this,
+							collection: state.get('library'),
+							selection:  state.get('selection'),
+							model:      state,
+							sortable:   state.get('sortable'),
+							search:     state.get('searchable'),
+							filters:    state.get('filterable'),
+							display:    state.get('displaySettings'),
+							dragInfo:   state.get('dragInfo'),
+
+							AttachmentView: nsmAttachment
+						});
+					},
+					renderView: function() { console.log('render NSM'); },
+					activateView: function() { console.log('activate NSM'); },
+					deactivateView: function() { console.log('deactivate NSM'); },
+				};
+				_.extend(nsmView, media.view.MediaFrame.prototype);
+
+				media.view.MediaFrame.Select.prototype.bindHandlers = function() {
+					nsmView.createStates( this );
+					nsmView.bindHandlers.call( this );
+
+					this.on( 'router:render:browse', nsmView.browseRouter, this );
+
+					this.on( 'content:create:nsm_browse', nsmView.createView, this );
+					this.on( 'content:render:nsm_browse', nsmView.renderView, this );
+					this.on( 'content:activate:nsm_browse', nsmView.activateView, this );
+					this.on( 'content:deactivate:nsm_browse', nsmView.deactivateView, this );
+				};
+			}(jQuery));
 		});
 	</script>
 EOH;
