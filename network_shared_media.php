@@ -107,11 +107,11 @@ function network_shared_media_print_templates() {
 				Query       = media.model.Query,
 				l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
 
-				nsmAttachmentsBrowser = media.view.nsmAttachmentsBrowser = media.view.AttachmentsBrowser.extend({
-					__createAttachments: function() {
+				media.view.nsmAttachmentsBrowser = media.view.AttachmentsBrowser.extend({
+					createAttachments: function() {
 						this.removeContent();
 
-						this.attachments = new nsmAttachment({
+						this.attachments = new media.view.Attachments({
 							controller: this.controller,
 							collection: this.collection,
 							selection:  this.options.selection,
@@ -126,12 +126,12 @@ function network_shared_media_print_templates() {
 					}
 				});
 
-				nsmAttachment = media.view.nsmAttachment = media.view.Attachment.extend({
+				media.view.nsmAttachment = media.view.Attachment.extend({
 					className: 'attachment nsm-attachment',
 
 					initialize: function() {
 	console.log('nsmAttachment initialize');
-						Attachment.prototype.initialize.apply( this, arguments );
+						media.view.Attachment.prototype.initialize.apply( this, arguments );
 					},
 
 					/**
@@ -196,7 +196,7 @@ function network_shared_media_print_templates() {
 
 						this.\$el.removeClass('hide-toolbar');
 
-						content.view = new nsmAttachmentsBrowser({
+						content.view = new media.view.nsmAttachmentsBrowser({
 							controller: this,
 							collection: state.get('library'),
 							selection:  state.get('selection'),
@@ -207,7 +207,7 @@ function network_shared_media_print_templates() {
 							display:    state.get('displaySettings'),
 							dragInfo:   state.get('dragInfo'),
 
-							AttachmentView: nsmAttachment
+							AttachmentView: media.view.nsmAttachment
 						});
 					},
 					renderView: function() { console.log('render NSM'); },
