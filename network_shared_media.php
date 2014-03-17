@@ -38,11 +38,11 @@ function network_shared_media_upload_shared_media() {
 	return wp_iframe(array( $nsm, 'media_upload_shared_media' ), array());
 }
 
-function network_shared_media_view_settings( $settings, $post ) {
+function network_shared_media_view_settings( $settings ) {
 	return $settings;
 }
 
-function network_shared_media_view_strings( $strings, $post ) {
+function network_shared_media_view_strings( $strings ) {
 	$strings['nsmTitle'] = __('Network Shared Media', 'networksharedmedia');
 
 	add_action( 'print_media_templates', 'network_shared_media_print_templates' );
@@ -63,15 +63,24 @@ function network_shared_media_print_templates() {
 				l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
 
 				var nsmAttachment = media.model.nsmAttachment = media.model.Attachment.extend({
-					fetch: function() { console.log( 'nsmAttachment fetch' ); }
+					sync: function() { console.log( 'nsmAttachment sync' ); media.model.Attachment.prototype.sync.apply( this, arguments ); },
+					fetch: function() { console.log( 'nsmAttachment fetch' ); media.model.Attachment.prototype.fetch.apply( this, arguments ); }
 				});
 
 				var nsmAttachments = media.model.nsmAttachments = media.model.Attachments.extend({
 					model: nsmAttachment,
-					fetch: function() { console.log( 'nsmAttachments fetch' ); },
-					sync: function () { console.log( 'nsmAttachments sync' ); },
+					initialize: function( models, options ) {
+						media.model.Attachments.prototype.initialize.apply( this, arguments );
+						this.props.on( 'change:blog', this._changeBlog, this );
+						this.props.set( _.extend( { blog: 2 }, this.props.attributes ) );
+					},
+
+					_changeBlog: function( model, blog ) { console.log( 'change blog for mode: ' + model + ' to blog: ' + blog ); },
+
+					sync: function() { console.log( 'nsmAttachments sync' ); media.model.Attachments.prototype.sync.apply( this, arguments ); },
+					fetch: function() { console.log( 'nsmAttachments fetch' ); media.model.Attachments.prototype.fetch.apply( this, arguments ); },
 					parse: function( resp, xhr ) {
-						console.log( 'nsmAttachments parse' );
+console.log( 'nsmAttachments parse' );
 						if ( ! _.isArray( resp ) ) {
 							resp = [resp];
 						}
@@ -235,6 +244,13 @@ function network_shared_media_print_templates() {
 EOH;
 }
 
+function network_shared_media_ajax_query_attachments_args( $query ) {
+	if( isset( $_REQUEST['query'] ) && array_key_exists( 'blog', $_REQUEST['query'] ) ) {
+		switch_to_blog( (int) $_REQUEST['query']['blog'] );
+	}
+	return $query;
+}
+
 function network_shared_media_init() {
 	if ( current_user_can('upload_files') ) {
 		load_plugin_textdomain( 'networksharedmedia', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
@@ -244,6 +260,9 @@ function network_shared_media_init() {
 		// WP >= 3.5
 		add_filter('media_view_settings', 'network_shared_media_view_settings');
 		add_filter('media_view_strings', 'network_shared_media_view_strings');
+
+		// New Media Browser
+		add_filter( 'ajax_query_attachments_args', 'network_shared_media_ajax_query_attachments_args' );
 	}
 }
 add_action( 'init', 'network_shared_media_init' );
