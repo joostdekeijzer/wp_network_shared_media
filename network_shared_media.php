@@ -27,7 +27,6 @@ Licence: GPLv2 or later
 
 // Add filter that inserts our new tab
 function network_shared_media_menu($tabs) {
-error_log( __FUNCTION__ );
 	$newtab = array('shared_media' => __('Network Shared Media', 'networksharedmedia'));
 	return array_merge($tabs, $newtab);
 }
@@ -44,8 +43,6 @@ function network_shared_media_view_settings( $settings ) {
 
 function network_shared_media_view_strings( $strings ) {
 	$strings['nsmTitle'] = __('Network Shared Media', 'networksharedmedia');
-
-	add_action( 'print_media_templates', 'network_shared_media_print_templates' );
 
 	return $strings;
 }
@@ -244,13 +241,6 @@ console.log( 'nsmAttachments parse' );
 EOH;
 }
 
-function network_shared_media_ajax_query_attachments_args( $query ) {
-	if( isset( $_REQUEST['query'] ) && array_key_exists( 'blog', $_REQUEST['query'] ) ) {
-		switch_to_blog( (int) $_REQUEST['query']['blog'] );
-	}
-	return $query;
-}
-
 function network_shared_media_init() {
 	if ( current_user_can('upload_files') ) {
 		load_plugin_textdomain( 'networksharedmedia', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
@@ -260,9 +250,6 @@ function network_shared_media_init() {
 		// WP >= 3.5
 		add_filter('media_view_settings', 'network_shared_media_view_settings');
 		add_filter('media_view_strings', 'network_shared_media_view_strings');
-
-		// New Media Browser
-		add_filter( 'ajax_query_attachments_args', 'network_shared_media_ajax_query_attachments_args' );
 	}
 }
 add_action( 'init', 'network_shared_media_init' );
@@ -549,3 +536,245 @@ error_log( print_r( $sites, true ) );
 	<?php
 	}
 }
+
+class netword_shared_media_backbonejs {
+	var $blogs = array();
+	var $current_blog_id;
+
+	public function __construct() {
+		add_action( 'init', array($this, 'init') );
+	}
+
+	public function init() {
+		$this->current_blog_id = $GLOBALS['blog_id'];
+
+		/* copied from depricated get_blog_list */
+		global $wpdb;
+		$blogs = $wpdb->get_results( $wpdb->prepare("SELECT blog_id, domain, path FROM $wpdb->blogs WHERE site_id = %d AND public = '1' AND archived = '0' AND spam = '0' AND deleted = '0' ORDER BY registered DESC", $wpdb->siteid), ARRAY_A );
+
+		$this->blogs = array();
+		$sort_array = array();
+
+		foreach ( (array) $blogs as $details ) {
+			if ( $details['blog_id'] == $this->current_blog_id || false || !current_user_can_for_blog( (int) $details['blog_id'], 'upload_files') ) continue;
+
+			$details['name'] = get_blog_option( (int) $details['blog_id'], 'blogname' );
+			$this->blogs[] = $details;
+			$sort_array[] = strtolower ( $details['name'] );
+		}
+		array_multisort( $sort_array, SORT_ASC, $this->blogs );
+
+		add_filter( 'media_view_strings', array($this, 'media_view_strings') );
+		add_filter( 'ajax_query_attachments_args', array($this, 'ajax_query_attachments_args') );
+	}
+
+	public function media_view_strings( $strings ) {
+		$strings['nsmTitle'] = __('Network Shared Media', 'networksharedmedia');
+		add_action( 'print_media_templates', array($this, 'print_media_templates') );
+		return $strings;
+	}
+
+	public function print_media_templates() {
+		$firstBlog = reset($this->blogs);
+		echo <<<EOH
+		<script type="text/javascript">
+			jQuery(window).on('load', function() {
+				// models
+				(function(\$) {
+					var media   = window.wp.media,
+					Attachment  = media.model.Attachment,
+					Attachments = media.model.Attachments,
+					Query       = media.model.Query,
+					l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
+
+					var nsmAttachment = media.model.nsmAttachment = media.model.Attachment.extend({
+						sync: function() { console.log( 'nsmAttachment sync' ); media.model.Attachment.prototype.sync.apply( this, arguments ); },
+						fetch: function() { console.log( 'nsmAttachment fetch' ); media.model.Attachment.prototype.fetch.apply( this, arguments ); }
+					});
+
+					var nsmAttachments = media.model.nsmAttachments = media.model.Attachments.extend({
+						model: nsmAttachment,
+						initialize: function( models, options ) {
+							media.model.Attachments.prototype.initialize.apply( this, arguments );
+							this.props.on( 'change:blog', this._changeBlog, this );
+							this.props.set( _.extend( { blog: {$firstBlog['blog_id']} }, this.props.attributes ) );
+						},
+
+						_changeBlog: function( model, blog ) { console.log( 'change blog for mode: ' + model + ' to blog: ' + blog ); },
+
+						sync: function() { console.log( 'nsmAttachments sync' ); media.model.Attachments.prototype.sync.apply( this, arguments ); },
+						fetch: function() { console.log( 'nsmAttachments fetch' ); media.model.Attachments.prototype.fetch.apply( this, arguments ); },
+						parse: function( resp, xhr ) {
+	console.log( 'nsmAttachments parse' );
+							if ( ! _.isArray( resp ) ) {
+								resp = [resp];
+							}
+
+							return _.map( resp, function( attrs ) {
+								var id, attachment, newAttributes;
+
+								if ( attrs instanceof Backbone.Model ) {
+									id = attrs.get( 'id' );
+									attrs = attrs.attributes;
+								} else {
+									id = attrs.id;
+								}
+
+								attachment = nsmAttachment.get( id );
+								newAttributes = attachment.parse( attrs, xhr );
+
+								if ( ! _.isEqual( attachment.attributes, newAttributes ) ) {
+									attachment.set( newAttributes );
+								}
+
+								return attachment;
+							});
+						}
+					});
+				}(jQuery));
+
+				// views & controllers
+				(function(\$) {
+					var media   = window.wp.media,
+					Attachment  = media.model.Attachment,
+					nsmAttachment  = media.model.nsmAttachment,
+					Attachments = media.model.Attachments,
+					nsmAttachments = media.model.nsmAttachments,
+					Query       = media.model.Query,
+					l10n = media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
+
+					media.view.nsmAttachmentsBrowser = media.view.AttachmentsBrowser.extend({
+						createAttachments: function() {
+							this.removeContent();
+
+							this.attachments = new media.view.Attachments({
+								controller: this.controller,
+								collection: this.collection,
+								selection:  this.options.selection,
+								model:      this.model,
+								sortable:   this.options.sortable,
+
+								// The single `Attachment` view to be used in the `Attachments` view.
+								AttachmentView: this.options.AttachmentView
+							});
+
+							this.views.add( this.attachments );
+						}
+					});
+
+					media.view.nsmAttachment = media.view.Attachment.extend({
+						className: 'attachment nsm-attachment',
+
+						initialize: function() {
+		console.log('nsmAttachment initialize');
+							media.view.Attachment.prototype.initialize.apply( this, arguments );
+						},
+
+						/**
+						 * Only the read method is allowed
+						 */
+						sync: function( method, model, options ) {
+		console.log('nsmAttachment sync');
+							// If the attachment does not yet have an `id`, return an instantly
+							// rejected promise. Otherwise, all of our requests will fail.
+							if ( _.isUndefined( this.id ) ) {
+								return \$.Deferred().rejectWith( this ).promise();
+							}
+
+							// Overload the `read` request so Attachment.fetch() functions correctly.
+							if ( 'read' === method ) {
+								options = options || {};
+								options.context = this;
+								options.data = _.extend( options.data || {}, {
+									action: 'get-attachment',
+									id: this.id
+								});
+								return media.ajax( options );
+							}
+							return \$.Deferred().rejectWith( this ).promise();
+						}
+					});
+
+					nsmView = {
+						bindHandlers: media.view.MediaFrame.Select.prototype.bindHandlers,
+						createStates: function( selectView ) {
+							var options = selectView.options;
+
+							selectView.states.add([
+								new media.controller.Library({
+									id:        'nsm-library',
+									library:   new nsmAttachments( null, {
+										props: options.library
+									}),
+									multiple:  options.multiple,
+									title:     options.title,
+									priority:  60
+								})
+							]);
+						},
+
+						browseRouter: function( view ) {
+							view.set({
+								nsm_browse: {
+									text:     l10n.nsmTitle,
+									priority: 60
+								}
+							});
+						},
+						createView: function( content ) {
+							console.log('create NSM');
+
+							//if ( ! this.get('nsmLibrary') ) {
+							//	this.set( 'nsmLibrary', media.query() );
+							//}
+
+							var state = this.state('nsm-library');
+
+							this.\$el.removeClass('hide-toolbar');
+
+							content.view = new media.view.nsmAttachmentsBrowser({
+								controller: this,
+								collection: state.get('library'),
+								selection:  state.get('selection'),
+								model:      state,
+								sortable:   state.get('sortable'),
+								search:     state.get('searchable'),
+								filters:    state.get('filterable'),
+								display:    state.get('displaySettings'),
+								dragInfo:   state.get('dragInfo'),
+
+								AttachmentView: media.view.nsmAttachment
+							});
+						},
+						renderView: function() { console.log('render NSM'); },
+						activateView: function() { console.log('activate NSM'); },
+						deactivateView: function() { console.log('deactivate NSM'); },
+					};
+					_.extend(nsmView, media.view.MediaFrame.prototype);
+
+					media.view.MediaFrame.Select.prototype.bindHandlers = function() {
+						nsmView.createStates( this );
+						nsmView.bindHandlers.call( this );
+
+						this.on( 'router:render:browse', nsmView.browseRouter, this );
+
+						this.on( 'content:create:nsm_browse', nsmView.createView, this );
+						this.on( 'content:render:nsm_browse', nsmView.renderView, this );
+						this.on( 'content:activate:nsm_browse', nsmView.activateView, this );
+						this.on( 'content:deactivate:nsm_browse', nsmView.deactivateView, this );
+					};
+				}(jQuery));
+			});
+		</script>
+EOH;
+	}
+
+	public function ajax_query_attachments_args( $query ) {
+		if( isset( $_REQUEST['query'] ) && array_key_exists( 'blog', $_REQUEST['query'] ) ) {
+			$blog = (int) $_REQUEST['query']['blog'];
+			switch_to_blog( $blog );
+		}
+		return $query;
+	}
+}
+$netword_shared_media_backbonejs = new netword_shared_media_backbonejs();
