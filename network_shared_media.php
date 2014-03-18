@@ -538,8 +538,9 @@ error_log( print_r( $sites, true ) );
 }
 
 class netword_shared_media_backbonejs {
-	var $blogs = array();
-	var $current_blog_id;
+	protected $blogs = array();
+	protected $current_blog_id;
+	protected $debug = true;
 
 	public function __construct() {
 		add_action( 'init', array($this, 'init') );
@@ -575,6 +576,10 @@ class netword_shared_media_backbonejs {
 	}
 
 	public function print_media_templates() {
+		if( $this->debug ) {
+			// disable heartbeat
+			echo "<script type=\"text/javascript\">jQuery(window).on('load', function() { jQuery(window).trigger('unload.wp-heartbeat'); });</script>";
+		}
 		$firstBlog = reset($this->blogs);
 		echo <<<EOH
 		<script type="text/javascript">
