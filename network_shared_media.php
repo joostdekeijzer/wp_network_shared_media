@@ -610,7 +610,7 @@ class netword_shared_media_backbonejs {
 						sync: function() { console.log( 'nsmAttachments sync' ); media.model.Attachments.prototype.sync.apply( this, arguments ); },
 						fetch: function() { console.log( 'nsmAttachments fetch' ); media.model.Attachments.prototype.fetch.apply( this, arguments ); },
 						parse: function( resp, xhr ) {
-	console.log( 'nsmAttachments parse' );
+console.log( 'nsmAttachments parse' );
 							if ( ! _.isArray( resp ) ) {
 								resp = [resp];
 							}
@@ -671,7 +671,7 @@ class netword_shared_media_backbonejs {
 						className: 'attachment nsm-attachment',
 
 						initialize: function() {
-		console.log('nsmAttachment initialize');
+console.log('nsmAttachment initialize');
 							media.view.Attachment.prototype.initialize.apply( this, arguments );
 						},
 
@@ -679,7 +679,7 @@ class netword_shared_media_backbonejs {
 						 * Only the read method is allowed
 						 */
 						sync: function( method, model, options ) {
-		console.log('nsmAttachment sync');
+console.log('nsmAttachment sync');
 							// If the attachment does not yet have an `id`, return an instantly
 							// rejected promise. Otherwise, all of our requests will fail.
 							if ( _.isUndefined( this.id ) ) {
@@ -748,7 +748,7 @@ class netword_shared_media_backbonejs {
 								display:    state.get('displaySettings'),
 								dragInfo:   state.get('dragInfo'),
 
-								AttachmentView: media.view.nsmAttachment
+								AttachmentView: state.get('AttachmentView')
 							});
 						},
 						renderView: function() { console.log('render NSM'); },
