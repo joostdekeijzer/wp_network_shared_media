@@ -2,9 +2,9 @@
 Contributors: joostdekeijzer
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=joost@dekeijzer.org&item_name=network-shared-media+WordPress+plugin&item_number=Joost+de+Keijzer&currency_code=EUR
 Tags: multisite, network, wpmu, media, image, photo, picture, mp3, video, integration
-Requires at least: 3.3
-Tested up to:  3.8
-Stable tag: 0.9.6
+Requires at least: 3.5
+Tested up to:  3.9
+Stable tag: 0.10.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,13 +23,36 @@ Also see https://github.com/joostdekeijzer/wp_network_shared_media
 == Installation ==
 
 * Download the plugin
-* Uncompress it with your preferred unzip programme
+* Uncompress it with your preferred unzip program
 * Copy the entire directory in your plugin directory of your WordPress blog (/wp-content/plugins)
 * Network-activate the plugin
 * Edit a post or create a new one
 * Open the Add Media popup -> see the new tab!
 
+== Upgrade Notice ==
+
+* I've dropped support for WordPress versions below 3.5
+* There is an issue with the "edit image" functionality in the post editor of WordPress 3.9, please see the FAQ
+
 == Frequently Asked Questions ==
+
+= Editing an image in WordPress 3.9 shows the wrong image! =
+
+Yes, I know :-(
+
+Starting from WordPress 3.9, when editing an image in the post editor, the original image data is retrieved from the server using only the image id. Using NSM, this will be the ID from a different blog. When, by coincidence, the current blog also has an attachment with that ID, the information for that image is displayed.
+
+v0.10.0 of my plugin has a fix for newly inserted images, but old embeds will not be changed (please see [this forum post](https://wordpress.org/support/topic/using-wordpress-39-editing-an-image-shows-the-wrong-information) for more info).
+
+If you encounter this, the most straight-forward solution is to:
+
+1. Cancel the image edit
+2. Go to the text view of the post
+3. When your image has a caption, clear the id attribute of the caption shortcode
+4. Also remove the `wp-image-<id>` and `wp-att-<id>` classes from the image tag
+5. Return to Visual mode and try and edit the image again
+
+Sorry for the inconvenience...
 
 = About Permissions =
 
@@ -57,6 +80,11 @@ This plugin only shows sites which attributes are set as follows:
 3. Show a selected image and "Insert into Post"
 
 == Changelog ==
+
+= 0.10.0 =
+* Changes all image/caption id's and id-dependent classnames to include `nsm-<site_id>-<id>` to circumvent WordPress 3.9 editor issues (see FAQ or [this forum post](https://wordpress.org/support/topic/using-wordpress-39-editing-an-image-shows-the-wrong-information))
+* New "base" for the insertion code
+* Supports Video and Audio shortcode insertion
 
 = 0.9.6 =
 * Bugfix where, after selecting an image, reopening the Media Browser would result in an empty screen.

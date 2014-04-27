@@ -8,3 +8,4 @@ http://wordpress.org/support/topic/some-libraries-show-broken-images
 - make above option cross-network?!?
 - add "featured image" link (or don't remove it and make it work)
 - make gallery shortcode work with networked images (see gallery_shortcode function)
+- WP3.9 edit image returns wrong image, see https://wordpress.org/support/topic/using-wordpress-39-editing-an-image-shows-the-wrong-information
