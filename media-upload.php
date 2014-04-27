@@ -19,7 +19,7 @@ if( isset( $_POST['send'] ) ) {
 	$nsm_send_id = (int) key( $_POST['send'] );
 }
 
-/* copied from media.php media_upload_form_handler */
+/* copied from wp-admin/inculdes/ajax-actions.php wp_ajax_send_attachment_to_editor() */
 if ( isset( $nsm_blog_id ) && isset( $nsm_send_id ) ) {
 	switch_to_blog( $nsm_blog_id );
 	if (!current_user_can('upload_files')) {
@@ -28,28 +28,54 @@ if ( isset( $nsm_blog_id ) && isset( $nsm_send_id ) ) {
 		wp_die(__('You do not have permission to upload files to site: ')  . $current_blog_name );
 	}
 
-	add_filter('media_send_to_editor', 'image_media_send_to_editor', 10, 3);
+	global $post;
 
-	$attachment = stripslashes_deep( $_POST['attachments'][$nsm_send_id] );
+	$attachment = wp_unslash( $_POST['attachments'][$nsm_send_id] );
+	$id = $nsm_send_id;
 
-	$html = $attachment['post_title'];
-	if ( !empty($attachment['url']) ) {
-		$rel = '';
-		if ( strpos($attachment['url'], 'attachment_id') || get_attachment_link($nsm_send_id) == $attachment['url'] )
-			$rel = " rel='attachment wp-att-" . esc_attr($nsm_send_id) . "'";
-		$html = "<a href='{$attachment['url']}'$rel>$html</a>";
+	if ( ! $post = get_post( $id ) )
+		wp_send_json_error();
+
+	if ( 'attachment' != $post->post_type )
+		wp_send_json_error();
+
+	$rel = $url = '';
+	$html = $title = isset( $attachment['post_title'] ) ? $attachment['post_title'] : '';
+	if ( ! empty( $attachment['url'] ) ) {
+		$url = $attachment['url'];
+		if ( strpos( $url, 'attachment_id') || get_attachment_link( $id ) == $url )
+			$rel = ' rel="attachment wp-att-' . $id . '"';
+		$html = '<a href="' . esc_url( $url ) . '"' . $rel . '>' . $html . '</a>';
 	}
 
-	$attachment_id = $nsm_send_id;
+	if ( 'image' === substr( $post->post_mime_type, 0, 5 ) ) {
+		$align = isset( $attachment['align'] ) ? $attachment['align'] : 'none';
+		$size = isset( $attachment['image-size'] ) ? $attachment['image-size'] : 'medium';
+		$alt = isset( $attachment['image_alt'] ) ? $attachment['image_alt'] : '';
+		$caption = isset( $attachment['post_excerpt'] ) ? $attachment['post_excerpt'] : '';
+		$title = ''; // We no longer insert title tags into <img> tags, as they are redundant.
+		$html = get_image_send_to_editor( $id, $caption, $title, $align, $url, (bool) $rel, $size, $alt );
+	} elseif ( 'video' === substr( $post->post_mime_type, 0, 5 ) || 'audio' === substr( $post->post_mime_type, 0, 5 ) ) {
+		global $wp_embed;
+		$meta = get_post_meta( $id, '_wp_attachment_metadata', true );
+		$html = $wp_embed->shortcode( $meta, $url );
+	}
 
-	/** copied from media.php image_media_send_to_editor **/
-	$url = $attachment['url'];
-	$align = !empty($attachment['align']) ? $attachment['align'] : 'none';
-	$size = !empty($attachment['image-size']) ? $attachment['image-size'] : 'medium';
-	$alt = !empty($attachment['image_alt']) ? $attachment['image_alt'] : '';
-	$rel = ( $url == get_attachment_link($attachment_id) );
+	/** This filter is documented in wp-admin/includes/media.php */
+	$html = apply_filters( 'media_send_to_editor', $html, $id, $attachment );
 
-	$html = get_image_send_to_editor($attachment_id, $attachment['post_excerpt'], $attachment['post_title'], $align, $url, $rel, $size, $alt);
+	// replace wp-image-<id>, wp-att-<id> and attachment_<id>
+	$html = preg_replace(
+		array(
+			'#(caption id="attachment_)(\d+")#', // mind the quotes!
+			'#(wp-image-|wp-att-)(\d+)#'
+		),
+		array(
+			sprintf('${1}nsm_%s_${2}', esc_attr($nsm_blog_id)),
+			sprintf('${1}nsm-%s-${2}', esc_attr($nsm_blog_id)),
+		),
+		$html
+	);
 
 	if( isset($_POST['chromeless']) && $_POST['chromeless'] ) {
 		// WP3.5+ media browser is identified by the 'chromeless' parameter
