@@ -1,0 +1,63 @@
+# Copyright (C) 2012 Network Shared Media
+# This file is distributed under the same license as the Network Shared Media package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Network Shared Media\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/network_shared_media\n"
+"POT-Creation-Date: 2012-06-06 13:42:31+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2014-09-16 11:10+0100\n"
+"Last-Translator: \n"
+"Language-Team: realloc <re@lloc.de>\n"
+"X-Generator: Poedit 1.5.7\n"
+"Language: de_DE\n"
+
+#: media-upload.php:27
+msgid "You do not have permission to upload files to site: "
+msgstr "Du hast keine Berechtigung zum Hochladen von Dateien zur Website:"
+
+#. #-#-#-#-#  network_shared_media.pot (Network Shared Media 0.8)  #-#-#-#-#
+#. Plugin Name of the plugin/theme
+#: network_shared_media.php:18
+msgid "Network Shared Media"
+msgstr ""
+
+#: network_shared_media.php:144
+msgid "You don't have access to any other sites media..."
+msgstr "Du hast keinen Zugriff auf die Mediengalerien in anderen Websites..."
+
+#: network_shared_media.php:202
+msgid "Selected site:"
+msgstr "Ausgewählte Website:"
+
+#: network_shared_media.php:208 network_shared_media.php:218
+#: network_shared_media.php:230
+msgid "Select site:"
+msgstr "Wähle Website:"
+
+#: network_shared_media.php:230
+msgid "Select &#187;"
+msgstr "Wähle &#187;"
+
+#. Plugin URI of the plugin/theme
+msgid "http://wordpress.org/extend/plugins/network-shared-media/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"This plugin adds a new tab to the \"Add Media\" window, allowing you to "
+"access media in other blogs. Based on an idea of Aaron Eaton"
+msgstr ""
+"Dieses Plugin fügt dem \"Medien hinzufügen\" Fenster einen neuen Reiter "
+"hinzu, der den Zugriff auf die Medien in anderen Blogs ermöglicht. Basiert "
+"auf einer Idee von Aaron Eaton"
+
+#. Author of the plugin/theme
+msgid "Joost de Keijzer"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://dekeijzer.org/"
+msgstr ""
