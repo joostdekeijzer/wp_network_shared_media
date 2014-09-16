@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=joost
 Tags: multisite, network, wpmu, media, image, photo, picture, mp3, video, integration
 Requires at least: 3.5
 Tested up to: 4.0
-Stable tag: 0.10.0
+Stable tag: 0.10.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,9 @@ This plugin only shows sites which attributes are set as follows:
 3. Show a selected image and "Insert into Post"
 
 == Changelog ==
+
+= 0.10.1 =
+* Added German translation (by realloc)
 
 = 0.10.0 =
 * Changes all image/caption id's and id-dependent classnames to include `nsm-<site_id>-<id>` to circumvent WordPress 3.9 editor issues (see FAQ or [this forum post](https://wordpress.org/support/topic/using-wordpress-39-editing-an-image-shows-the-wrong-information))
