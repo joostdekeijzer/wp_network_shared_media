@@ -3,7 +3,7 @@ Contributors: joostdekeijzer
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=joost@dekeijzer.org&item_name=network-shared-media+WordPress+plugin&item_number=Joost+de+Keijzer&currency_code=EUR
 Tags: multisite, network, wpmu, media, image, photo, picture, mp3, video, integration
 Requires at least: 3.5
-Tested up to: 4.0
+Tested up to: 4.2
 Stable tag: 0.10.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
