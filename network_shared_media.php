@@ -596,6 +596,7 @@ class netword_shared_media_backbonejs {
 			echo "<script type=\"text/javascript\">jQuery(function(\$) { \$(window).trigger('unload.wp-heartbeat'); });</script>";
 		}
 
+// !!! http://wordpress.stackexchange.com/questions/85235/extending-wp-media-model-query-media-from-different-blog-on-network-and-refresh
 		echo <<<EOH
 <script type="text/javascript">
 window.wp = window.wp || {};
