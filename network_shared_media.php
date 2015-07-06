@@ -597,12 +597,59 @@ class netword_shared_media_backbonejs {
 		}
 
 // !!! http://wordpress.stackexchange.com/questions/85235/extending-wp-media-model-query-media-from-different-blog-on-network-and-refresh
-		echo <<<EOH
+?>
 <script type="text/javascript">
 window.wp = window.wp || {};
+var blogs = window.blogs || {
+    current_blog: 2,
+    UserBlogs: [
+        {userblog_id: 1, domain: 'main'},
+        {userblog_id: 2, domain: 'nl'},
+        {userblog_id: 3, domain: 'es'},
+        {userblog_id: 4, domain: 'sc'},
+    ]};
+(function ($) {
+	wp.media.editor.on('open', function() {
+		console.log('open');
+		console.log(arguments);
+	});
+return;
+    "use strict"; // jshint ;_;
+    var current = blogs['current_blog'];
+    var Blogs = blogs['UserBlogs'];
+
+    $(function() {
+        var media = wp.media.editor.add('content');
+        media.on('render', function() {
+            var html = $("<select>", {name:'blog_id', id: 'blog_id'});
+            $.each(Blogs, function (index, blog) {
+                html.append($("<option>", {value:blog.userblog_id, html:blog.domain}).prop({ selected: blog.userblog_id == current}));
+            });
+        $(".attachment-filters").after(html);
+
+        $("select#blog_id").change(function () {
+            var str = "";
+            $("select#blog_id option:selected").each(function () {
+                str += $(this).val();
+                var options = {
+                    type: 'POST',
+                    url: ajaxurl,
+                    data: {
+                        blog: str
+                    }
+                };
+                wp.media.ajax('switch_blog', options );
+                var query = wp.media.query();
+                console.log(query);
+            });
+        })
+    });
+});
+}(jQuery));
 
 // models
-( function(\$, _) {
+( function($, _) {
+return;
 	var media = wp.media,
 		Attachment  = media.model.Attachment,
 		Attachments = media.model.Attachments,
@@ -657,7 +704,8 @@ console.log( 'nsmAttachments parse' );
 }(jQuery, _));
 
 // controllers & views
-( function(\$, _) {
+( function($, _) {
+return;
 	var media = wp.media,
 		Attachment  = media.model.Attachment,
 		nsmAttachment  = media.model.nsmAttachment,
@@ -701,7 +749,7 @@ console.log('nsmAttachment sync');
 			// If the attachment does not yet have an `id`, return an instantly
 			// rejected promise. Otherwise, all of our requests will fail.
 			if ( _.isUndefined( this.id ) ) {
-				return \$.Deferred().rejectWith( this ).promise();
+				return $.Deferred().rejectWith( this ).promise();
 			}
 
 			// Overload the `read` request so Attachment.fetch() functions correctly.
@@ -714,7 +762,7 @@ console.log('nsmAttachment sync');
 				});
 				return media.ajax( options );
 			}
-			return \$.Deferred().rejectWith( this ).promise();
+			return $.Deferred().rejectWith( this ).promise();
 		}
 	});
 
@@ -778,7 +826,7 @@ console.log('nsmAttachment sync');
 
 			var state = this.state('nsm-library');
 
-			this.\$el.removeClass('hide-toolbar');
+			this.$el.removeClass('hide-toolbar');
 
 			content.view = new media.view.nsmAttachmentsBrowser({
 				controller: this,
@@ -800,7 +848,7 @@ console.log('nsmAttachment sync');
 	});
 }(jQuery, _));
 </script>
-EOH;
+<?php
 	}
 
 	public function _print_media_templates() {
