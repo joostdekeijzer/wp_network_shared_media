@@ -80,6 +80,9 @@ This plugin only shows sites which attributes are set as follows:
 3. Show a selected image and "Insert into Post"
 
 == Changelog ==
+= 0.11 =
+* Removed media-upload.php file and the direct request for it. It was incompatible with setups where the plugins directory had been moved. Now, requests are done through /wp-admin/admin-ajax.php.
+* Tested with WordPress 4.3
 
 = 0.10.1 =
 * Added German translation (by realloc)
