@@ -1,16 +1,30 @@
-=== Network Shared Media ===
+=== Network Shared Media (deprecated/unsupported) ===
 Contributors: joostdekeijzer
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=joost@dekeijzer.org&item_name=network-shared-media+WordPress+plugin&item_number=Joost+de+Keijzer&currency_code=EUR
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=j@dkzr.nl&item_name=network-shared-media+WordPress+plugin&item_number=Joost+de+Keijzer&currency_code=EUR
 Tags: multisite, network, wpmu, media, image, photo, picture, mp3, video, integration
 Requires at least: 3.5
 Tested up to: 5.0
-Stable tag: 0.11
+Stable tag: 0.12
+Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Allows you to use media from other blogs in a Multisite environment.
 
 == Description ==
+
+=== Deprecated ===
+
+I'm sorry to have to inform you that this plugin is unsupported and therefore deprecated.
+
+It was build just before the new javascript Mediabrowser was introduced and rebuilding this plugin to support this is a complete overhaul.
+
+There are some alternatives available, as is posted in https://wordpress.org/support/topic/no-support-try-network-media-library/
+Also see https://github.com/humanmade/network-media-library#history and https://github.com/humanmade/network-media-library#alternatives for options.
+
+Thanks for using this plugin!
+
+=== Original description ===
 
 This plugin adds a new tab to the "Add Media" window, allowing you to access media in other blogs.
 
@@ -80,6 +94,10 @@ This plugin only shows sites which attributes are set as follows:
 3. Show a selected image and "Insert into Post"
 
 == Changelog ==
+
+= 0.12 =
+* Deprecated
+
 = 0.11 =
 * Removed media-upload.php file and the direct request for it. It was incompatible with setups where the plugins directory had been moved. Now, requests are done through /wp-admin/admin-ajax.php.
 * Tested with WordPress 4.3
